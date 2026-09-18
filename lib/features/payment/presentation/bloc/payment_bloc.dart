@@ -48,6 +48,7 @@ final class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
   ) : super(const PaymentInitial()) {
     on<PaymentLoadRequested>(_onLoadRequested);
     on<PaymentConfirmationRequested>(_onConfirmationRequested);
+    on<PaymentPrimaryActionRequested>(_onPrimaryActionRequested);
     on<_PaymentProcessingUpdateReceived>(_onProcessingUpdateReceived);
     on<_PaymentProcessingStreamFailed>(_onProcessingStreamFailed);
   }
@@ -59,6 +60,24 @@ final class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
   final ObservePaymentProcessing _observePaymentProcessing;
 
   StreamSubscription<PaymentProcessingUpdate>? _processingSubscription;
+
+  void _onPrimaryActionRequested(
+    PaymentPrimaryActionRequested event,
+    Emitter<PaymentState> emit,
+  ) {
+    final nextEvent = switch (state) {
+      PaymentReady() ||
+      PaymentConfirmationBlocked() ||
+      PaymentSecurityCheckFailed() => const PaymentConfirmationRequested(),
+      PaymentCompleted(outcome: PaymentOutcome.failure) ||
+      PaymentProcessingFailed() => const PaymentLoadRequested(),
+      _ => null,
+    };
+
+    if (nextEvent != null) {
+      add(nextEvent);
+    }
+  }
 
   Future<void> _onLoadRequested(
     PaymentLoadRequested event,

@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:retail_test_task/core/tenant/tenant_design_tokens.dart';
 import 'package:retail_test_task/features/payment/presentation/tenant/payment_page_section.dart';
+import 'package:retail_test_task/features/payment/presentation/tenant/payment_page_section_key.dart';
 
 class UtilityBillBreakdown extends PaymentPageSection {
   const UtilityBillBreakdown({super.key});
+
+  static const sectionKey = PaymentPageSectionKey.utilityBillBreakdown;
 
   @override
   Widget build(BuildContext context) {

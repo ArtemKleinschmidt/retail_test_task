@@ -59,10 +59,8 @@ final class PaymentReady extends PaymentContentState {
   SecurityStatus get visibleSecurityStatus => securityStatus;
 
   @override
-  PaymentActionViewData get primaryAction => const PaymentActionViewData(
-    label: 'Confirm payment',
-    intent: PaymentActionIntent.confirm,
-  );
+  PaymentActionViewData get primaryAction =>
+      const PaymentActionViewData(label: 'Confirm payment', isEnabled: true);
 
   @override
   List<Object> get props => [payment, securityStatus];
@@ -77,7 +75,7 @@ final class PaymentCheckingSecurity extends PaymentContentState {
   @override
   PaymentActionViewData get primaryAction => const PaymentActionViewData(
     label: 'Checking security…',
-    intent: PaymentActionIntent.none,
+    isEnabled: false,
   );
 
   @override
@@ -101,10 +99,8 @@ final class PaymentConfirmationBlocked extends PaymentContentState {
   SecurityErrorViewData get securityError => _blockedSecurityError(decision);
 
   @override
-  PaymentActionViewData get primaryAction => const PaymentActionViewData(
-    label: 'Check again',
-    intent: PaymentActionIntent.confirm,
-  );
+  PaymentActionViewData get primaryAction =>
+      const PaymentActionViewData(label: 'Check again', isEnabled: true);
 
   @override
   List<Object> get props => [payment, securityStatus, decision];
@@ -136,7 +132,7 @@ final class PaymentSecurityCheckFailed extends PaymentContentState {
   @override
   PaymentActionViewData get primaryAction => const PaymentActionViewData(
     label: 'Retry security check',
-    intent: PaymentActionIntent.confirm,
+    isEnabled: true,
   );
 
   @override
@@ -160,10 +156,8 @@ final class PaymentProcessing extends PaymentContentState {
   int get processingPercentage => percentage;
 
   @override
-  PaymentActionViewData get primaryAction => PaymentActionViewData(
-    label: 'Processing $percentage%',
-    intent: PaymentActionIntent.none,
-  );
+  PaymentActionViewData get primaryAction =>
+      PaymentActionViewData(label: 'Processing $percentage%', isEnabled: false);
 
   @override
   List<Object> get props => [payment, securityStatus, percentage];
@@ -194,10 +188,7 @@ final class PaymentCompleted extends PaymentContentState {
       return null;
     }
 
-    return const PaymentActionViewData(
-      label: 'Try again',
-      intent: PaymentActionIntent.reload,
-    );
+    return const PaymentActionViewData(label: 'Try again', isEnabled: true);
   }
 
   @override
@@ -220,10 +211,8 @@ final class PaymentProcessingFailed extends PaymentContentState {
   );
 
   @override
-  PaymentActionViewData get primaryAction => const PaymentActionViewData(
-    label: 'Try again',
-    intent: PaymentActionIntent.reload,
-  );
+  PaymentActionViewData get primaryAction =>
+      const PaymentActionViewData(label: 'Try again', isEnabled: true);
 
   @override
   List<Object> get props => [payment, failure];
@@ -253,13 +242,11 @@ final class PaymentFeedbackViewData {
   final bool isPositive;
 }
 
-enum PaymentActionIntent { none, confirm, reload }
-
 final class PaymentActionViewData {
-  const PaymentActionViewData({required this.label, required this.intent});
+  const PaymentActionViewData({required this.label, required this.isEnabled});
 
   final String label;
-  final PaymentActionIntent intent;
+  final bool isEnabled;
 }
 
 String _formatMoney(Money money) {

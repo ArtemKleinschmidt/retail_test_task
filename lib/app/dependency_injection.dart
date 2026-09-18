@@ -10,11 +10,13 @@ import 'package:retail_test_task/features/payment/domain/use_cases/load_payment.
 import 'package:retail_test_task/features/payment/domain/use_cases/observe_payment_processing.dart';
 import 'package:retail_test_task/features/payment/domain/use_cases/start_payment_processing.dart';
 import 'package:retail_test_task/features/payment/presentation/bloc/payment_bloc.dart';
+import 'package:retail_test_task/features/payment/presentation/tenant/payment_page_section_mapper.dart';
 
 final GetIt serviceLocator = GetIt.instance;
 
 void registerDependencies(GetIt locator) {
   locator
+    ..registerLazySingleton(PaymentPageSectionMapper.new)
     ..registerLazySingleton<PaymentRepository>(
       () => SimulatedPaymentRepository(payment: createPredefinedPayment()),
     )

@@ -53,34 +53,26 @@ void main() {
       final retail = flavorCatalog.forTenant(TenantId.retail);
       final utility = flavorCatalog.forTenant(TenantId.utility);
 
-      expect(
-        retail.paymentComponents.sections.map((section) => section.runtimeType),
-        [
-          PaymentPageHeadingSection,
-          RetailPromoBanner,
-          PaymentSummarySection,
-          PaymentSecurityOverviewSection,
-          RetailSecurityError,
-          PaymentProgressSection,
-          PaymentResultSection,
-          PaymentActionSection,
-        ],
-      );
-      expect(
-        utility.paymentComponents.sections.map(
-          (section) => section.runtimeType,
-        ),
-        [
-          PaymentPageHeadingSection,
-          PaymentSummarySection,
-          PaymentSecurityOverviewSection,
-          UtilityBillBreakdown,
-          UtilitySecurityError,
-          PaymentProgressSection,
-          PaymentResultSection,
-          PaymentActionSection,
-        ],
-      );
+      expect(retail.paymentComponents.sectionKeys, [
+        PaymentPageHeadingSection.sectionKey,
+        RetailPromoBanner.sectionKey,
+        PaymentSummarySection.sectionKey,
+        PaymentSecurityOverviewSection.sectionKey,
+        RetailSecurityError.sectionKey,
+        PaymentProgressSection.sectionKey,
+        PaymentResultSection.sectionKey,
+        PaymentActionSection.sectionKey,
+      ]);
+      expect(utility.paymentComponents.sectionKeys, [
+        PaymentPageHeadingSection.sectionKey,
+        PaymentSummarySection.sectionKey,
+        PaymentSecurityOverviewSection.sectionKey,
+        UtilityBillBreakdown.sectionKey,
+        UtilitySecurityError.sectionKey,
+        PaymentProgressSection.sectionKey,
+        PaymentResultSection.sectionKey,
+        PaymentActionSection.sectionKey,
+      ]);
     });
   });
 }

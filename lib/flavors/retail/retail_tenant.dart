@@ -10,15 +10,15 @@ final TenantConfig _retailTenant = TenantConfig(
 final AppFlavor _retailFlavor = AppFlavor(
   tenant: _retailTenant,
   paymentComponents: PaymentTenantComponents(
-    sections: const [
-      PaymentPageHeadingSection(),
-      RetailPromoBanner(),
-      PaymentSummarySection(),
-      PaymentSecurityOverviewSection(),
-      RetailSecurityError(),
-      PaymentProgressSection(),
-      PaymentResultSection(),
-      PaymentActionSection(),
+    sectionKeys: const [
+      PaymentPageHeadingSection.sectionKey,
+      RetailPromoBanner.sectionKey,
+      PaymentSummarySection.sectionKey,
+      PaymentSecurityOverviewSection.sectionKey,
+      RetailSecurityError.sectionKey,
+      PaymentProgressSection.sectionKey,
+      PaymentResultSection.sectionKey,
+      PaymentActionSection.sectionKey,
     ],
   ),
 );

@@ -15,6 +15,10 @@ final class PaymentConfirmationRequested extends PaymentEvent {
   const PaymentConfirmationRequested();
 }
 
+final class PaymentPrimaryActionRequested extends PaymentEvent {
+  const PaymentPrimaryActionRequested();
+}
+
 final class _PaymentProcessingUpdateReceived extends PaymentEvent {
   const _PaymentProcessingUpdateReceived(this.update);
 

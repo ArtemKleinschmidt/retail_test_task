@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:retail_test_task/core/tenant/tenant_design_tokens.dart';
 import 'package:retail_test_task/features/payment/domain/entities/security_status.dart';
 import 'package:retail_test_task/features/payment/presentation/tenant/payment_page_section.dart';
+import 'package:retail_test_task/features/payment/presentation/tenant/payment_page_section_key.dart';
 
 class PaymentSecurityOverviewSection extends PaymentPageSection {
   const PaymentSecurityOverviewSection({super.key});
+
+  static const sectionKey = PaymentPageSectionKey.securityOverview;
 
   @override
   Widget build(BuildContext context) {

@@ -10,15 +10,15 @@ final TenantConfig _utilityTenant = TenantConfig(
 final AppFlavor _utilityFlavor = AppFlavor(
   tenant: _utilityTenant,
   paymentComponents: PaymentTenantComponents(
-    sections: const [
-      PaymentPageHeadingSection(),
-      PaymentSummarySection(),
-      PaymentSecurityOverviewSection(),
-      UtilityBillBreakdown(),
-      UtilitySecurityError(),
-      PaymentProgressSection(),
-      PaymentResultSection(),
-      PaymentActionSection(),
+    sectionKeys: const [
+      PaymentPageHeadingSection.sectionKey,
+      PaymentSummarySection.sectionKey,
+      PaymentSecurityOverviewSection.sectionKey,
+      UtilityBillBreakdown.sectionKey,
+      UtilitySecurityError.sectionKey,
+      PaymentProgressSection.sectionKey,
+      PaymentResultSection.sectionKey,
+      PaymentActionSection.sectionKey,
     ],
   ),
 );

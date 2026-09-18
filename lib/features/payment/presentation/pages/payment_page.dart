@@ -1,11 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
 import 'package:retail_test_task/core/tenant/tenant_design_tokens.dart';
 import 'package:retail_test_task/core/tenant/tenant_scope.dart';
 import 'package:retail_test_task/features/payment/debug/payment_debug_scenario.dart';
 import 'package:retail_test_task/features/payment/presentation/bloc/payment_bloc.dart';
 import 'package:retail_test_task/features/payment/presentation/pages/payment_debug_page.dart';
+import 'package:retail_test_task/features/payment/presentation/tenant/payment_page_section_mapper.dart';
 import 'package:retail_test_task/features/payment/presentation/widgets/payment_state_view.dart';
 
 typedef PaymentBlocFactory = PaymentBloc Function();
@@ -41,6 +43,7 @@ class PaymentPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final tenant = TenantScope.of(context);
     final tokens = Theme.of(context).extension<TenantDesignTokens>()!;
+    final sectionMapper = GetIt.instance<PaymentPageSectionMapper>();
 
     return Scaffold(
       appBar: AppBar(
@@ -63,7 +66,13 @@ class PaymentPage extends StatelessWidget {
               switchOutCurve: tokens.motionCurve,
               child: KeyedSubtree(
                 key: ValueKey<Type>(state.runtimeType),
-                child: PaymentStateView(state: state),
+                child: PaymentStateView(
+                  state: state,
+                  sectionMapper: sectionMapper,
+                  onPaymentAction: () => context.read<PaymentBloc>().add(
+                    const PaymentPrimaryActionRequested(),
+                  ),
+                ),
               ),
             );
           },

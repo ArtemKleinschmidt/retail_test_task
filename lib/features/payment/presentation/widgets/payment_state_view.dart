@@ -3,12 +3,20 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:retail_test_task/core/tenant/tenant_design_tokens.dart';
 import 'package:retail_test_task/features/payment/presentation/bloc/payment_bloc.dart';
 import 'package:retail_test_task/features/payment/presentation/tenant/payment_page_section.dart';
+import 'package:retail_test_task/features/payment/presentation/tenant/payment_page_section_mapper.dart';
 import 'package:retail_test_task/features/payment/presentation/tenant/payment_tenant_components_scope.dart';
 
 class PaymentStateView extends StatelessWidget {
-  const PaymentStateView({required this.state, super.key});
+  const PaymentStateView({
+    required this.state,
+    required this.sectionMapper,
+    required this.onPaymentAction,
+    super.key,
+  });
 
   final PaymentState state;
+  final PaymentPageSectionMapper sectionMapper;
+  final VoidCallback onPaymentAction;
 
   @override
   Widget build(BuildContext context) {
@@ -26,20 +34,30 @@ class PaymentStateView extends StatelessWidget {
       ),
       PaymentContentState contentState => _PaymentContentView(
         state: contentState,
+        sectionMapper: sectionMapper,
+        onPaymentAction: onPaymentAction,
       ),
     };
   }
 }
 
 class _PaymentContentView extends StatelessWidget {
-  const _PaymentContentView({required this.state});
+  const _PaymentContentView({
+    required this.state,
+    required this.sectionMapper,
+    required this.onPaymentAction,
+  });
 
   final PaymentContentState state;
+  final PaymentPageSectionMapper sectionMapper;
+  final VoidCallback onPaymentAction;
 
   @override
   Widget build(BuildContext context) {
     final tokens = Theme.of(context).extension<TenantDesignTokens>()!;
-    final sections = PaymentTenantComponentsScope.of(context).sections
+    final sectionKeys = PaymentTenantComponentsScope.of(context).sectionKeys;
+    final sections = sectionMapper
+        .mapAll(sectionKeys, onPaymentAction: onPaymentAction)
         .where((section) => section.isVisible(state))
         .toList(growable: false);
 
