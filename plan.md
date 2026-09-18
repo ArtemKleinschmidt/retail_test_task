@@ -59,6 +59,13 @@ Status values: `Not started`, `In progress`, `Blocked`, `Done`.
 - Before adding or modifying tests, present the exact automated and manual test
   coverage and obtain explicit user approval.
 - Approval of this plan does not approve test authoring for individual steps.
+- Limit automated coverage to unit tests and BLoC tests using `bloc_test`. Do
+  not add widget tests or integration tests.
+- Keep tests meaningful and minimal, and test only project-owned behavior. Do
+  not test third-party frameworks or add coverage-only tests for trivial
+  wiring.
+- Verify UI rendering, application bootstrap, flavor launches, and end-to-end
+  platform behavior manually.
 - A step is `Done` only after its approved automated tests, manual checks,
   formatting, and static analysis pass.
 - Record completed work and remaining work in the cross-chat handoff log.
@@ -68,7 +75,7 @@ Status values: `Not started`, `In progress`, `Blocked`, `Done`.
 
 | Step | Workstream | Status | Depends on |
 | --- | --- | --- | --- |
-| 1 | Architecture foundation | Not started | - |
+| 1 | Architecture foundation | Done | - |
 | 2 | Flavors and tenant configuration | Not started | 1 |
 | 3 | Payment domain | Not started | 1 |
 | 4 | Payment BLoC | Not started | 3 |
@@ -81,29 +88,34 @@ Status values: `Not started`, `In progress`, `Blocked`, `Done`.
 
 ## Step 1 - Establish the Architecture Foundation
 
-**Status:** Not started
+**Status:** Done
 
 **PDF mapping:** Architecture-first recommendation; scalability, Clean
 Architecture, and SOLID evaluation criteria.
 
 ### Implementation
 
-- [ ] Replace the counter-demo structure with the application bootstrap.
-- [ ] Create the feature-first clean architecture folders.
-- [ ] Create the `get_it` composition root.
-- [ ] Enforce the agreed dependency direction.
-- [ ] Add only abstractions required by the payment and security features.
+- [x] Replace the counter-demo structure with the application bootstrap.
+- [x] Create the feature-first clean architecture folders.
+- [x] Create the `get_it` composition root.
+- [x] Enforce the agreed dependency direction.
+- [x] Add only abstractions required by the payment and security features.
 
 ### Verification gate
 
-- [ ] Present bootstrap and dependency-registration unit tests for approval.
-- [ ] Obtain approval before writing or modifying tests.
-- [ ] Run approved automated tests.
-- [ ] Launch the application manually.
-- [ ] Confirm domain imports no Flutter, BLoC, data, or platform code.
-- [ ] Run formatting and static analysis.
+- [x] Confirm Step 1 introduces no meaningful unit-testable or BLoC behavior;
+      do not add tests for empty dependency wiring or third-party frameworks.
+- [x] Launch the application manually and verify the bootstrap.
+- [x] Confirm domain imports no Flutter, BLoC, data, or platform code.
+- [x] Run formatting and static analysis.
 
-**Completion evidence:** _Pending_
+**Completion evidence:** Application bootstrap, neutral app shell, `get_it`
+composition root, and payment layer directories are present. The generated
+widget test was removed. `fvm dart format .`, `fvm flutter analyze`, and
+`fvm flutter build apk --debug` passed; the debug APK is at
+`build/app/outputs/flutter-apk/app-debug.apk`. The Android launch was confirmed
+manually. No tests were added because this step contains no meaningful
+project-owned unit-testable or BLoC behavior.
 
 ## Step 2 - Implement Flavors and Tenant Configuration
 
@@ -213,11 +225,12 @@ requirements.
 
 ### Verification gate
 
-- [ ] Present widget tests for shared states, tenant components, and security
-      errors for approval.
+- [ ] Present unit tests for independently testable tenant configuration and
+      component selection for approval.
 - [ ] Obtain approval before writing or modifying tests.
 - [ ] Run approved automated tests.
-- [ ] Compare both flavors manually on small and standard Android screens.
+- [ ] Compare shared states, tenant components, and security errors for both
+      flavors manually on small and standard Android screens.
 - [ ] Run formatting and static analysis.
 
 **Completion evidence:** _Pending_
@@ -430,6 +443,8 @@ steps.
 | 2026-09-18 | Plan | Defer APK-versus-video choice | Delivery decision belongs at completion |
 | 2026-09-18 | Plan | Use genuine Codex interactions for AI evidence | User-confirmed AI tool |
 | 2026-09-18 | Plan | Use built-in visual assets only | No external brand assets were supplied |
+| 2026-09-18 | Step 1 | Limit automation to unit and BLoC tests | User excluded widget and integration tests |
+| 2026-09-18 | Step 1 | Test only meaningful project-owned behavior | Avoid tests of framework guarantees or trivial wiring |
 
 ## Cross-Chat Handoff Log
 
@@ -438,3 +453,4 @@ Add one concise row whenever a chat completes or hands work to another chat.
 | Date | Step | Completed | Next action | Blockers or approvals needed |
 | --- | --- | --- | --- | --- |
 | 2026-09-18 | Planning | Requirements and implementation plan approved | Start Step 1 | Step 1 test proposal must be approved before tests are written |
+| 2026-09-18 | Step 1 | Bootstrap, architecture folders, DI root, test policy, formatting, analysis, debug compilation, and manual launch | Start Step 2 | None |

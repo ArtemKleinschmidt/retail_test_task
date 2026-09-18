@@ -53,6 +53,8 @@ These rules favor caution over speed. Use judgment for trivial tasks.
 - Never create a commit or push changes without the user's explicit approval.
   Approval applies only to the commit and push requested at that time; do not
   treat it as standing permission for later changes.
+- When the user asks to commit changes, propose the exact commit message and
+  obtain explicit confirmation before running `git commit`.
 
 ### Goal-Driven Execution
 
@@ -82,13 +84,26 @@ These rules favor caution over speed. Use judgment for trivial tasks.
 
 - Prefer immutable states, events, entities, and value objects. Use
   `Equatable` where value equality is useful.
+- Limit automated tests in this test task to unit tests and BLoC tests using
+  `bloc_test`. Do not add widget tests or integration tests.
+- Keep tests meaningful and minimal. Test project-owned behavior, not
+  third-party frameworks or libraries.
+- Do not add coverage-only tests for trivial wiring, empty registrations, or
+  behavior already guaranteed by a dependency. If a step introduces no
+  meaningful unit-testable or BLoC behavior, document that and rely on static
+  analysis and the agreed manual checks.
 - For every implementation step, propose the relevant automated tests and
   manual checks before writing tests.
 - Do not add or modify tests until the user explicitly approves the proposed
   test coverage. After approval, a step is not complete until its approved
   tests and manual checks pass.
-- Cover domain and data behavior with unit tests and BLoCs with `bloc_test`.
-  Use `mocktail` only at dependency boundaries.
+- Cover project-owned domain, data, and independently testable platform
+  behavior with unit tests. Cover BLoCs with `bloc_test` and use `mocktail`
+  only at dependency boundaries.
+- Verify UI rendering, application bootstrap, flavor launches, and end-to-end
+  platform behavior manually.
+- Do not complicate production code solely to make framework startup or UI
+  behavior unit-testable.
 - Mirror the `lib/` structure under `test/` where practical.
 - Before finishing a change, run formatting, analysis, and relevant tests.
 - Keep dependencies minimal and justify new packages at their layer boundary.
