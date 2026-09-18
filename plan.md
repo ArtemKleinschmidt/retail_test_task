@@ -81,7 +81,7 @@ Status values: `Not started`, `In progress`, `Blocked`, `Done`.
 | 4 | Payment BLoC | Done | 3 |
 | 5 | Tenant payment UI | In progress | 2, 4 |
 | 6 | Security approach investigation | Done | 1 |
-| 7 | Kotlin security environment check | Not started | 3, 6 |
+| 7 | Kotlin security environment check | Done | 3, 6 |
 | 8 | Payment-page window protection | Not started | 5, 7 |
 | 9 | Foreground payment processing | Not started | 4, 7 |
 | 10 | Security animation | Not started | 2, 5 |
@@ -310,32 +310,45 @@ active recording, explicit `unsupported` status below API 35, and independent
 
 ## Step 7 - Implement the Kotlin Security Environment Check
 
-**Status:** Not started
+**Status:** Done
 
 **PDF mapping:** Section 3B root and screen-recorder detection through Kotlin
 and MethodChannel; MethodChannel thread-safety evaluation.
 
 ### Implementation
 
-- [ ] Implement the approved root-detection approach.
-- [ ] Implement the approved screen-recording detection approach.
-- [ ] Represent unsupported detection explicitly.
-- [ ] Expose typed results through a MethodChannel.
-- [ ] Keep expensive checks off the Android UI thread.
-- [ ] Register and unregister native callbacks safely.
-- [ ] Map MethodChannel responses through data into domain models.
-- [ ] Deliver results to PaymentBloc only through domain use cases.
+- [x] Implement the approved root-detection approach.
+- [x] Implement the approved screen-recording detection approach.
+- [x] Represent unsupported detection explicitly.
+- [x] Expose typed snapshots through a MethodChannel and recording changes
+      through an EventChannel.
+- [x] Keep expensive checks off the Android UI thread.
+- [x] Register and unregister native callbacks safely.
+- [x] Map platform-channel responses through data into domain models.
+- [x] Deliver results to PaymentBloc only through domain use cases.
 
 ### Verification gate
 
-- [ ] Present Kotlin detector and Dart channel-adapter unit tests for approval.
-- [ ] Obtain approval before writing or modifying tests.
-- [ ] Run approved automated tests.
-- [ ] Manually verify available rooted/non-rooted signals, active/inactive
-      recording, unsupported versions, and channel errors.
-- [ ] Run formatting and static analysis.
+- [x] Present focused Dart channel-adapter and BLoC tests for approval.
+- [x] Obtain approval before writing or modifying tests.
+- [x] Run approved automated tests.
+- [x] Manually verify the available API 36.1 non-rooted signal and dynamic
+      active/inactive recording transitions.
+- [x] Document that rooted-device and pre-35 device checks were unavailable;
+      cover their mappings and channel errors through the approved tests.
+- [x] Run formatting and static analysis.
 
-**Completion evidence:** _Pending_
+**Completion evidence:** Added the pinned RootBeer 0.1.2 dependency, API 35+
+recording callback lifecycle, explicit pre-35 unsupported result, a
+background-task-queue MethodChannel for point-in-time checks, and an
+EventChannel that updates PaymentBloc immediately when recording starts or
+stops. The API 36.1 emulator/user check confirmed non-rooted clear status and
+dynamic active/inactive recording transitions; no rooted or pre-35 device was
+available, so those positive/unsupported paths remain documented and covered
+at the adapter/domain boundary rather than claimed as device evidence. All 75
+tests passed, Flutter analysis and Android lint passed, and Retail and Utility
+debug APKs built successfully. Diagnostic Logcat tags `SecurityRecording` and
+`SecurityEnvironment` remain available for platform troubleshooting.
 
 ## Step 8 - Implement Payment-Page Window Protection
 
@@ -500,7 +513,9 @@ steps.
 | 2026-09-18 | Step 4 | Subscribe to processing updates before requesting processing start | Prevents early native progress from being missed and gives the BLoC ownership of subscription cleanup |
 | 2026-09-18 | Step 4 | Keep unsuccessful results separate from processing failures | Preserves the domain distinction between a completed business outcome and an infrastructure breakdown |
 | 2026-09-18 | Step 5 | Let each flavor own ordered section keys resolved by a GetIt-provided mapper | Removes widget construction and placement slots from flavor configuration while keeping ordering explicit |
-| 2026-09-18 | Step 6 | Use RootBeer 0.1.2 from Kotlin for heuristic root detection; pin the official release artifact because Maven Central publication failed | Uses the user-selected maintained detector and its current 16 KB native-library support without an unpinned repository dependency |
+| 2026-09-18 | Step 6 | Use RootBeer 0.1.2 from Kotlin for heuristic root detection | Uses the user-selected maintained detector and its current 16 KB native-library support |
+| 2026-09-19 | Step 7 | Pin `com.scottyab:rootbeer-lib:0.1.2` from Maven Central and record its published AAR checksum | The artifact became available after the maintainer's initial publication failure, removing the need for a vendored AAR or JitPack |
+| 2026-09-19 | Step 7 | Stream recording-state changes through an EventChannel while retaining MethodChannel snapshots | Keeps the UI and confirmation policy current without polling or bypassing PaymentBloc |
 | 2026-09-18 | Step 6 | Use Android's recording-visibility callback on API 35+ and return `unsupported` below API 35 | This is the only truthful public API boundary; older screenshot/display heuristics do not prove active recording |
 | 2026-09-18 | Step 6 | Keep `FLAG_SECURE` independent of recording detection | Protects the payment window across supported versions even where active-recording detection is unavailable |
 
@@ -518,3 +533,4 @@ Add one concise row whenever a chat completes or hands work to another chat.
 | 2026-09-18 | Step 4 | Immutable PaymentBloc events and states, security re-checks, processing orchestration and cleanup, 19 approved BLoC tests, temporary manual smoke flow, formatting, and analysis | Start Step 5 | Step 5 test coverage must be proposed and approved before tests are written |
 | 2026-09-18 | Step 5 | Shared PaymentBloc UI, debug scenario page, simulated adapters, flavor-owned ordered section keys, mapper-owned widget construction, analysis, both debug APK builds, and approved 360x640 ready-state inspections | Start Step 6 | Step 6 investigation recommendation requires approval before security implementation |
 | 2026-09-18 | Step 6 | Researched Android recording APIs and root-detection options; documented requirement traceability; approved RootBeer 0.1.2 plus the API 35 recording callback and cross-version `FLAG_SECURE` approach | Start Step 7 | Step 7 Kotlin detector and Dart channel-adapter tests must be proposed and approved before tests are written |
+| 2026-09-19 | Step 7 | Added RootBeer-backed root checks, lifecycle-safe recording callbacks, MethodChannel snapshots, EventChannel updates, domain/BLoC integration, approved tests, diagnostics, lint, analysis, and both flavor builds | Start Step 8 | Step 8 test coverage must be proposed and approved before tests are written |

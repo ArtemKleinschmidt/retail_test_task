@@ -1,6 +1,6 @@
 import 'package:get_it/get_it.dart';
+import 'package:retail_test_task/features/payment/data/repositories/method_channel_security_repository.dart';
 import 'package:retail_test_task/features/payment/data/repositories/simulated_payment_repository.dart';
-import 'package:retail_test_task/features/payment/data/repositories/simulated_security_repository.dart';
 import 'package:retail_test_task/features/payment/data/sources/predefined_payment.dart';
 import 'package:retail_test_task/features/payment/domain/repositories/payment_repository.dart';
 import 'package:retail_test_task/features/payment/domain/repositories/security_repository.dart';
@@ -8,6 +8,7 @@ import 'package:retail_test_task/features/payment/domain/use_cases/check_securit
 import 'package:retail_test_task/features/payment/domain/use_cases/evaluate_confirmation.dart';
 import 'package:retail_test_task/features/payment/domain/use_cases/load_payment.dart';
 import 'package:retail_test_task/features/payment/domain/use_cases/observe_payment_processing.dart';
+import 'package:retail_test_task/features/payment/domain/use_cases/observe_screen_recording.dart';
 import 'package:retail_test_task/features/payment/domain/use_cases/start_payment_processing.dart';
 import 'package:retail_test_task/features/payment/presentation/bloc/payment_bloc.dart';
 import 'package:retail_test_task/features/payment/presentation/tenant/payment_page_section_mapper.dart';
@@ -20,12 +21,15 @@ void registerDependencies(GetIt locator) {
     ..registerLazySingleton<PaymentRepository>(
       () => SimulatedPaymentRepository(payment: createPredefinedPayment()),
     )
-    ..registerLazySingleton<SecurityRepository>(SimulatedSecurityRepository.new)
+    ..registerLazySingleton<SecurityRepository>(
+      MethodChannelSecurityRepository.new,
+    )
     ..registerLazySingleton(() => LoadPayment(locator()))
     ..registerLazySingleton(() => CheckSecurityStatus(locator()))
     ..registerLazySingleton(EvaluateConfirmation.new)
     ..registerLazySingleton(() => StartPaymentProcessing(locator()))
     ..registerLazySingleton(() => ObservePaymentProcessing(locator()))
+    ..registerLazySingleton(() => ObserveScreenRecording(locator()))
     ..registerFactory(
       () => PaymentBloc(
         loadPayment: locator(),
@@ -33,6 +37,7 @@ void registerDependencies(GetIt locator) {
         evaluateConfirmation: locator(),
         startPaymentProcessing: locator(),
         observePaymentProcessing: locator(),
+        observeScreenRecording: locator(),
       ),
     );
 }

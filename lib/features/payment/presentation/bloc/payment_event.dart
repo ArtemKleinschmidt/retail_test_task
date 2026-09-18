@@ -40,3 +40,21 @@ final class _PaymentProcessingStreamFailed extends PaymentEvent {
   @override
   List<Object> get props => [reference, failure];
 }
+
+final class _ScreenRecordingStatusChanged extends PaymentEvent {
+  const _ScreenRecordingStatusChanged(this.status);
+
+  final SecuritySignalState status;
+
+  @override
+  List<Object> get props => [status];
+}
+
+final class _SecurityObservationFailed extends PaymentEvent {
+  const _SecurityObservationFailed(this.failure);
+
+  final SecurityCheckFailure failure;
+
+  @override
+  List<Object> get props => [failure];
+}

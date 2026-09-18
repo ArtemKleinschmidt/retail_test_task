@@ -50,4 +50,7 @@ final class SimulatedSecurityRepository implements SecurityRepository {
       ),
     };
   }
+
+  @override
+  Stream<SecuritySignalState> observeScreenRecording() => const Stream.empty();
 }

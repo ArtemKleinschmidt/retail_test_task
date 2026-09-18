@@ -6,6 +6,7 @@ import 'package:retail_test_task/features/payment/domain/use_cases/check_securit
 import 'package:retail_test_task/features/payment/domain/use_cases/evaluate_confirmation.dart';
 import 'package:retail_test_task/features/payment/domain/use_cases/load_payment.dart';
 import 'package:retail_test_task/features/payment/domain/use_cases/observe_payment_processing.dart';
+import 'package:retail_test_task/features/payment/domain/use_cases/observe_screen_recording.dart';
 import 'package:retail_test_task/features/payment/domain/use_cases/start_payment_processing.dart';
 import 'package:retail_test_task/features/payment/presentation/bloc/payment_bloc.dart';
 
@@ -25,5 +26,6 @@ PaymentBloc createDebugPaymentBloc(PaymentDebugScenario scenario) {
     evaluateConfirmation: const EvaluateConfirmation(),
     startPaymentProcessing: StartPaymentProcessing(paymentRepository),
     observePaymentProcessing: ObservePaymentProcessing(paymentRepository),
+    observeScreenRecording: ObserveScreenRecording(securityRepository),
   );
 }

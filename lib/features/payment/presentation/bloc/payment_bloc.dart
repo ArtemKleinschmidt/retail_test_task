@@ -14,6 +14,7 @@ import 'package:retail_test_task/features/payment/domain/use_cases/check_securit
 import 'package:retail_test_task/features/payment/domain/use_cases/evaluate_confirmation.dart';
 import 'package:retail_test_task/features/payment/domain/use_cases/load_payment.dart';
 import 'package:retail_test_task/features/payment/domain/use_cases/observe_payment_processing.dart';
+import 'package:retail_test_task/features/payment/domain/use_cases/observe_screen_recording.dart';
 import 'package:retail_test_task/features/payment/domain/use_cases/start_payment_processing.dart';
 import 'package:retail_test_task/features/payment/presentation/tenant/view_data/bill_breakdown_item_view_data.dart';
 import 'package:retail_test_task/features/payment/presentation/tenant/view_data/payment_supplement_view_data.dart';
@@ -29,6 +30,7 @@ final class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
     required EvaluateConfirmation evaluateConfirmation,
     required StartPaymentProcessing startPaymentProcessing,
     required ObservePaymentProcessing observePaymentProcessing,
+    required ObserveScreenRecording observeScreenRecording,
   }) {
     return PaymentBloc._(
       loadPayment,
@@ -36,6 +38,7 @@ final class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
       evaluateConfirmation,
       startPaymentProcessing,
       observePaymentProcessing,
+      observeScreenRecording,
     );
   }
 
@@ -45,12 +48,29 @@ final class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
     this._evaluateConfirmation,
     this._startPaymentProcessing,
     this._observePaymentProcessing,
+    this._observeScreenRecording,
   ) : super(const PaymentInitial()) {
     on<PaymentLoadRequested>(_onLoadRequested);
     on<PaymentConfirmationRequested>(_onConfirmationRequested);
     on<PaymentPrimaryActionRequested>(_onPrimaryActionRequested);
     on<_PaymentProcessingUpdateReceived>(_onProcessingUpdateReceived);
     on<_PaymentProcessingStreamFailed>(_onProcessingStreamFailed);
+    on<_ScreenRecordingStatusChanged>(_onScreenRecordingStatusChanged);
+    on<_SecurityObservationFailed>(_onSecurityObservationFailed);
+    _securityObservationSubscription = _observeScreenRecording().listen(
+      (status) => add(_ScreenRecordingStatusChanged(status)),
+      onError: (Object error, StackTrace stackTrace) {
+        add(
+          _SecurityObservationFailed(
+            error is SecurityCheckFailure
+                ? error
+                : const SecurityCheckFailure(
+                    'The device security status could not be checked.',
+                  ),
+          ),
+        );
+      },
+    );
   }
 
   final LoadPayment _loadPayment;
@@ -58,8 +78,10 @@ final class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
   final EvaluateConfirmation _evaluateConfirmation;
   final StartPaymentProcessing _startPaymentProcessing;
   final ObservePaymentProcessing _observePaymentProcessing;
+  final ObserveScreenRecording _observeScreenRecording;
 
   StreamSubscription<PaymentProcessingUpdate>? _processingSubscription;
+  StreamSubscription<SecuritySignalState>? _securityObservationSubscription;
 
   void _onPrimaryActionRequested(
     PaymentPrimaryActionRequested event,
@@ -215,6 +237,57 @@ final class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
     );
   }
 
+  void _onScreenRecordingStatusChanged(
+    _ScreenRecordingStatusChanged event,
+    Emitter<PaymentState> emit,
+  ) {
+    final currentState = state;
+    switch (currentState) {
+      case PaymentReady(:final payment, :final securityStatus) ||
+          PaymentConfirmationBlocked(:final payment, :final securityStatus):
+        emit(
+          _evaluateSecurity(
+            payment,
+            SecurityStatus(
+              root: securityStatus.root,
+              screenRecording: event.status,
+            ),
+          ),
+        );
+      case PaymentProcessing(
+        :final payment,
+        :final securityStatus,
+        :final percentage,
+      ):
+        emit(
+          PaymentProcessing(
+            payment: payment,
+            securityStatus: SecurityStatus(
+              root: securityStatus.root,
+              screenRecording: event.status,
+            ),
+            percentage: percentage,
+          ),
+        );
+      default:
+        return;
+    }
+  }
+
+  void _onSecurityObservationFailed(
+    _SecurityObservationFailed event,
+    Emitter<PaymentState> emit,
+  ) {
+    final currentState = state;
+    if (currentState
+        case PaymentReady(:final payment) ||
+            PaymentConfirmationBlocked(:final payment)) {
+      emit(
+        PaymentSecurityCheckFailed(payment: payment, failure: event.failure),
+      );
+    }
+  }
+
   PaymentState _evaluateSecurity(
     Payment payment,
     SecurityStatus securityStatus,
@@ -257,6 +330,8 @@ final class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
   @override
   Future<void> close() async {
     await _cancelProcessingSubscription();
+    await _securityObservationSubscription?.cancel();
+    _securityObservationSubscription = null;
     return super.close();
   }
 }

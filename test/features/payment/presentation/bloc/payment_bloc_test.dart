@@ -17,6 +17,7 @@ import 'package:retail_test_task/features/payment/domain/use_cases/check_securit
 import 'package:retail_test_task/features/payment/domain/use_cases/evaluate_confirmation.dart';
 import 'package:retail_test_task/features/payment/domain/use_cases/load_payment.dart';
 import 'package:retail_test_task/features/payment/domain/use_cases/observe_payment_processing.dart';
+import 'package:retail_test_task/features/payment/domain/use_cases/observe_screen_recording.dart';
 import 'package:retail_test_task/features/payment/domain/use_cases/start_payment_processing.dart';
 import 'package:retail_test_task/features/payment/presentation/bloc/payment_bloc.dart';
 
@@ -37,6 +38,7 @@ void main() {
   late MockPaymentRepository paymentRepository;
   late MockSecurityRepository securityRepository;
   late StreamController<PaymentProcessingUpdate> processingController;
+  late StreamController<SecuritySignalState> securityController;
   late Payment payment;
 
   PaymentBloc buildBloc() {
@@ -46,6 +48,7 @@ void main() {
       evaluateConfirmation: const EvaluateConfirmation(),
       startPaymentProcessing: StartPaymentProcessing(paymentRepository),
       observePaymentProcessing: ObservePaymentProcessing(paymentRepository),
+      observeScreenRecording: ObserveScreenRecording(securityRepository),
     );
   }
 
@@ -53,6 +56,7 @@ void main() {
     paymentRepository = MockPaymentRepository();
     securityRepository = MockSecurityRepository();
     processingController = StreamController<PaymentProcessingUpdate>();
+    securityController = StreamController<SecuritySignalState>();
     payment = Payment(
       reference: PaymentReference('INV-001'),
       payeeName: 'City Utilities',
@@ -61,6 +65,8 @@ void main() {
 
     when(paymentRepository.loadPayment).thenAnswer((_) async => payment);
     when(securityRepository.checkStatus).thenAnswer((_) async => clearStatus);
+    when(securityRepository.observeScreenRecording)
+        .thenAnswer((_) => securityController.stream);
     when(() => paymentRepository.observeProcessing(payment.reference))
         .thenAnswer((_) => processingController.stream);
     when(() => paymentRepository.startProcessing(payment.reference))
@@ -70,6 +76,9 @@ void main() {
   tearDown(() {
     if (!processingController.isClosed) {
       unawaited(processingController.close());
+    }
+    if (!securityController.isClosed) {
+      unawaited(securityController.close());
     }
   });
 
@@ -355,6 +364,61 @@ void main() {
         verify(() => paymentRepository.startProcessing(payment.reference))
             .called(1);
       },
+    );
+  });
+
+  group('dynamic screen-recording status', () {
+    blocTest<PaymentBloc, PaymentState>(
+      'blocks a ready payment as soon as recording starts',
+      build: buildBloc,
+      seed: () => PaymentReady(payment: payment, securityStatus: clearStatus),
+      act: (_) => securityController.add(SecuritySignalState.detected),
+      expect: () => [
+        PaymentConfirmationBlocked(
+          payment: payment,
+          securityStatus: const SecurityStatus(
+            root: SecuritySignalState.clear,
+            screenRecording: SecuritySignalState.detected,
+          ),
+          decision: ConfirmationDecision.blocked(const [
+            SecurityThreat.screenRecording,
+          ]),
+        ),
+      ],
+    );
+
+    blocTest<PaymentBloc, PaymentState>(
+      'returns to ready as soon as recording stops',
+      build: buildBloc,
+      seed: () => PaymentConfirmationBlocked(
+        payment: payment,
+        securityStatus: const SecurityStatus(
+          root: SecuritySignalState.clear,
+          screenRecording: SecuritySignalState.detected,
+        ),
+        decision: ConfirmationDecision.blocked(const [
+          SecurityThreat.screenRecording,
+        ]),
+      ),
+      act: (_) => securityController.add(SecuritySignalState.clear),
+      expect: () => [
+        PaymentReady(payment: payment, securityStatus: clearStatus),
+      ],
+    );
+
+    blocTest<PaymentBloc, PaymentState>(
+      'fails closed when dynamic observation fails',
+      build: buildBloc,
+      seed: () => PaymentReady(payment: payment, securityStatus: clearStatus),
+      act: (_) => securityController.addError(
+        const SecurityCheckFailure('Recording status unavailable.'),
+      ),
+      expect: () => [
+        PaymentSecurityCheckFailed(
+          payment: payment,
+          failure: const SecurityCheckFailure('Recording status unavailable.'),
+        ),
+      ],
     );
   });
 

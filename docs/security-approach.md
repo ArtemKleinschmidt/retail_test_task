@@ -18,10 +18,12 @@ the existing domain repository boundary:
    Android version. Detection and prevention are separate controls.
 
 RootBeer 0.1.2 is the approved version because its March 2026 release added
-`/system_ext/bin` coverage and 16 KB native-library page-size support. The
-maintainer could not publish that version to Maven Central, so Step 7 should
-use the official GitHub release artifact pinned by checksum, retain its
-Apache-2.0 license notice, and avoid an unpinned JitPack dependency.
+`/system_ext/bin` coverage and 16 KB native-library page-size support. Although
+the maintainer initially reported a Maven Central publishing failure, the
+artifact is now available there. Step 7 should therefore use the exact
+`com.scottyab:rootbeer-lib:0.1.2` coordinate, record the published AAR checksum
+`0980126fccc8343448d2989a49fc3a54357d43f7453b9182be30f4141c9f10c0`,
+retain its Apache-2.0 license notice, and avoid JitPack or a vendored binary.
 
 The screen-recording API adds one install-time normal permission,
 `android.permission.DETECT_SCREEN_RECORDING`, with no runtime prompt. Neither
@@ -50,7 +52,8 @@ The Kotlin adapter should:
 - call the standard `isRooted()`, not the BusyBox-inclusive variant;
 - report `detected` when RootBeer returns `true`, otherwise `clear`;
 - perform the check away from the Android UI thread, as RootBeer recommends;
-- pin and verify the 0.1.2 release artifact and retain its license notice; and
+- pin the Maven Central 0.1.2 artifact, record its checksum, and retain its
+  license notice; and
 - expose no indicator paths or device details to the presentation layer.
 
 The integration should not:
@@ -69,6 +72,11 @@ cached state from subsequent callbacks, and unregister the same callback in
 `onStop`. The callback should use the activity main executor, as required for
 lifecycle/window work.
 
+Recording-state changes are also published through an EventChannel so the
+PaymentBloc can block and unblock the visible payment state immediately when
+recording starts or stops. The MethodChannel remains the authoritative
+point-in-time check used during loading and immediately before confirmation.
+
 The MethodChannel check should run on a Flutter background task queue so root
 filesystem work cannot block the platform/UI thread. The channel response can
 then combine the root result with the cached recording state. Unsupported API
@@ -79,7 +87,7 @@ or channel failures must remain failures so the existing BLoC can fail closed.
 
 | Option | Maintenance and compatibility | Dependencies / privacy | Decision |
 | --- | --- | --- | --- |
-| RootBeer | Active project; release 0.1.2 was published in March 2026 and added `/system_ext/bin` plus 16 KB native-library page-size work. Its own documentation describes results as indications and advises background execution. The 0.1.2 maintainer issue records Maven publication trouble. | Adds Apache-2.0 Java/JNI code and packaged native libraries; no network access. Package-name checks are limited without explicit package visibility. | Approved for Step 7; pin the official 0.1.2 release artifact by checksum |
+| RootBeer | Active project; release 0.1.2 was published in March 2026 and added `/system_ext/bin` plus 16 KB native-library page-size work. Its own documentation describes results as indications and advises background execution. The artifact is now available from Maven Central despite the initial publication issue. | Adds Apache-2.0 Java/JNI code and packaged native libraries; no network access. Package-name checks are limited without explicit package visibility. | Approved for Step 7; pin `com.scottyab:rootbeer-lib:0.1.2` and record the published AAR checksum |
 | Direct Kotlin heuristic | Fully owned and auditable, but would duplicate a narrower subset of RootBeer's checks and require ongoing maintenance | No dependency, network, package inventory, or collected data | Rejected in favor of the user-selected maintained library |
 | Flutter root/jailbreak wrappers | Several are currently published, commonly wrapping RootBeer | Adds a second plugin/channel abstraction while this task explicitly evaluates our Kotlin MethodChannel; often includes unrelated iOS/emulator checks | Rejected |
 | freeRASP | Actively maintained and much broader than root detection | Freemium binary SDK, configuration and lifecycle surface, unrelated RASP features, and anonymized security-diagnostic collection | Rejected as disproportionate to the task |
@@ -93,7 +101,7 @@ that common Java/native checks can be hooked or hidden.
 
 | Requirement | Coverage | Planned implementation |
 | --- | --- | --- |
-| Use Kotlin for Android system integration | Covered | Kotlin owns RootBeer invocation, screen-recording lifecycle, MethodChannel handling, and `FLAG_SECURE` window calls. RootBeer is an implementation dependency, not a replacement for the Kotlin bridge. |
+| Use Kotlin for Android system integration | Covered | Kotlin owns RootBeer invocation, screen-recording lifecycle, MethodChannel/EventChannel handling, and `FLAG_SECURE` window calls. RootBeer is an implementation dependency, not a replacement for the Kotlin bridge. |
 | MethodChannel detects a rooted device | Covered heuristically on API 24+ | Step 7 calls RootBeer `isRooted()` off the UI thread, maps `true`/`false` to typed channel data, and preserves native failures. As with every local root detector, “clear” is not cryptographic proof. |
 | MethodChannel detects an active screen recorder | Covered on API 35+; explicitly unsupported on API 24-34 | Step 7 caches the official `WindowManager` recording-visibility callback state and includes it in the same typed channel result. No truthful public equivalent exists on older versions. |
 | Automatically apply `FLAG_SECURE` while the Payment Page is visible | Covered by Step 8 | Page visibility will call Kotlin through the native bridge; Kotlin will set the flag on the Android UI thread, keep it while the page is current/backgrounded, and clear it only after leaving. Repeated or out-of-order calls will be idempotent. |
