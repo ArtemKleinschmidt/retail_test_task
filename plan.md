@@ -79,7 +79,7 @@ Status values: `Not started`, `In progress`, `Blocked`, `Done`.
 | 2 | Flavors and tenant configuration | Done | 1 |
 | 3 | Payment domain | Done | 1 |
 | 4 | Payment BLoC | Done | 3 |
-| 5 | Tenant payment UI | Not started | 2, 4 |
+| 5 | Tenant payment UI | In progress | 2, 4 |
 | 6 | Security approach investigation | Not started | 1 |
 | 7 | Kotlin security environment check | Not started | 3, 6 |
 | 8 | Payment-page window protection | Not started | 5, 7 |
@@ -233,34 +233,43 @@ made no changes and `fvm flutter analyze` reported no issues.
 
 ## Step 5 - Build the Payment UI for Both Tenants
 
-**Status:** Not started
+**Status:** Done
 
 **PDF mapping:** Section 3A Brand A and Brand B visual and functional
 requirements.
 
 ### Implementation
 
-- [ ] Build the shared payment-page shell.
-- [ ] Add the payment summary, security state, animation area, tenant content,
+- [x] Build the shared payment-page shell.
+- [x] Add the payment summary, security state, animation area, tenant content,
       confirmation action, progress, and result presentation.
-- [ ] Implement the Retail Shop orange/gold palette, rounded components, fluid
+- [x] Implement the Retail Shop orange/gold palette, rounded components, fluid
       transitions, and promo banner.
-- [ ] Implement the Utility Pay navy/slate palette, sharp components,
+- [x] Implement the Utility Pay navy/slate palette, sharp components,
       high-density layout, and detailed bill breakdown.
-- [ ] Implement a distinct security error presentation for each flavor.
-- [ ] Keep both variants on the same domain and PaymentBloc.
+- [x] Implement a distinct security error presentation for each flavor.
+- [x] Keep both variants on the same domain and PaymentBloc.
 
 ### Verification gate
 
-- [ ] Present unit tests for independently testable tenant configuration and
+- [x] Present unit tests for independently testable tenant configuration and
       component selection for approval.
-- [ ] Obtain approval before writing or modifying tests.
-- [ ] Run approved automated tests.
-- [ ] Compare shared states, tenant components, and security errors for both
+- [x] Obtain approval before writing or modifying tests.
+- [x] Run approved automated tests.
+- [x] Compare shared states, tenant components, and security errors for both
       flavors manually on small and standard Android screens.
-- [ ] Run formatting and static analysis.
+- [x] Run formatting and static analysis.
 
-**Completion evidence:** _Pending_
+**Completion evidence:** Replaced the placeholder with one PaymentBloc-driven
+payment flow, deterministic simulated adapters, and a debug-only scenario page
+covering every existing load, security, and processing branch. Retail and
+Utility now own immutable ordered lists of reusable payment-section widgets;
+the shared renderer contains no flavor branches, tenant IDs, placement enums,
+or predefined slots. Promo Banner and Bill Breakdown titles and ordering were
+verified in both flavors. `fvm flutter analyze` reported no issues, all 59
+approved unit and BLoC tests passed, both debug flavor APKs compiled, and the
+approved inspection-only Retail and Utility ready-state captures passed at a
+360x640 logical viewport without creating screenshot baselines.
 
 ## Step 6 - Investigate Android Security Checks
 
@@ -481,6 +490,7 @@ steps.
 | 2026-09-18 | Step 4 | Re-check security immediately before every confirmation | Prevents a security status captured during initial loading from becoming a stale authorization decision |
 | 2026-09-18 | Step 4 | Subscribe to processing updates before requesting processing start | Prevents early native progress from being missed and gives the BLoC ownership of subscription cleanup |
 | 2026-09-18 | Step 4 | Keep unsuccessful results separate from processing failures | Preserves the domain distinction between a completed business outcome and an infrastructure breakdown |
+| 2026-09-18 | Step 5 | Let each flavor own an ordered list of reusable payment-section widgets | Removes fragile placement slots while keeping shared payment rendering free of flavor conditionals |
 
 ## Cross-Chat Handoff Log
 
@@ -494,3 +504,4 @@ Add one concise row whenever a chat completes or hands work to another chat.
 | 2026-09-18 | Step 2 refinement | Moved tenant identity, theme, scope, and catalog into `core`; kept payment contracts and ViewData in the payment feature; moved concrete brand composition into `flavors`; analysis, tests, and both APK builds passed | Start Step 3 | Step 3 test proposal must be approved before tests are written |
 | 2026-09-18 | Step 3 | Pure-Dart payment and security models, failures, repository contracts, use cases, approved unit tests, dependency audit, formatting, and analysis | Start Step 4 | Step 4 `bloc_test` coverage must be proposed and approved before tests are written |
 | 2026-09-18 | Step 4 | Immutable PaymentBloc events and states, security re-checks, processing orchestration and cleanup, 19 approved BLoC tests, temporary manual smoke flow, formatting, and analysis | Start Step 5 | Step 5 test coverage must be proposed and approved before tests are written |
+| 2026-09-18 | Step 5 | Shared PaymentBloc UI, debug scenario page, simulated adapters, flavor-owned ordered payment sections, 59 passing tests, analysis, both debug APK builds, and approved 360x640 ready-state inspections | Start Step 6 | Step 6 investigation recommendation requires approval before security implementation |

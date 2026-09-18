@@ -1,22 +1,10 @@
-import 'package:flutter/material.dart';
-import 'package:retail_test_task/features/payment/presentation/tenant/view_data/payment_supplement_view_data.dart';
-import 'package:retail_test_task/features/payment/presentation/tenant/view_data/security_error_view_data.dart';
-
-abstract interface class PaymentSupplementStrategy {
-  Widget build(BuildContext context, PaymentSupplementViewData data);
-}
-
-abstract interface class SecurityErrorStrategy {
-  Widget build(BuildContext context, SecurityErrorViewData data);
-}
+import 'package:flutter/foundation.dart';
+import 'package:retail_test_task/features/payment/presentation/tenant/payment_page_section.dart';
 
 @immutable
 final class PaymentTenantComponents {
-  const PaymentTenantComponents({
-    required this.paymentSupplement,
-    required this.securityError,
-  });
+  PaymentTenantComponents({required Iterable<PaymentPageSection> sections})
+    : sections = List.unmodifiable(sections);
 
-  final PaymentSupplementStrategy paymentSupplement;
-  final SecurityErrorStrategy securityError;
+  final List<PaymentPageSection> sections;
 }

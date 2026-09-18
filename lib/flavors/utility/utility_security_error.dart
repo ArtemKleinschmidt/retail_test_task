@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:retail_test_task/core/tenant/tenant_design_tokens.dart';
-import 'package:retail_test_task/features/payment/presentation/tenant/view_data/security_error_view_data.dart';
+import 'package:retail_test_task/features/payment/presentation/bloc/payment_bloc.dart';
+import 'package:retail_test_task/features/payment/presentation/tenant/payment_page_section.dart';
 
-class UtilitySecurityError extends StatelessWidget {
-  const UtilitySecurityError({required this.data, super.key});
+class UtilitySecurityError extends PaymentPageSection {
+  const UtilitySecurityError({super.key});
 
-  final SecurityErrorViewData data;
+  @override
+  bool isVisible(PaymentContentState state) => state.securityError != null;
 
   @override
   Widget build(BuildContext context) {
+    final data = PaymentPageSectionScope.of(context).state.securityError!;
     final theme = Theme.of(context);
     final tokens = theme.extension<TenantDesignTokens>()!;
 

@@ -3,21 +3,23 @@ import 'package:retail_test_task/core/tenant/tenant_design_tokens.dart';
 import 'package:retail_test_task/features/payment/presentation/bloc/payment_bloc.dart';
 import 'package:retail_test_task/features/payment/presentation/tenant/payment_page_section.dart';
 
-class RetailSecurityError extends PaymentPageSection {
-  const RetailSecurityError({super.key});
+class PaymentResultSection extends PaymentPageSection {
+  const PaymentResultSection({super.key});
 
   @override
-  bool isVisible(PaymentContentState state) => state.securityError != null;
+  bool isVisible(PaymentContentState state) => state.feedback != null;
 
   @override
   Widget build(BuildContext context) {
-    final data = PaymentPageSectionScope.of(context).state.securityError!;
+    final feedback = PaymentPageSectionScope.of(context).state.feedback!;
     final theme = Theme.of(context);
     final tokens = theme.extension<TenantDesignTokens>()!;
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: tokens.securityErrorBackground,
+        color: feedback.isPositive
+            ? theme.colorScheme.primaryContainer
+            : theme.colorScheme.errorContainer,
         borderRadius: BorderRadius.circular(tokens.cardRadius),
       ),
       child: Padding(
@@ -26,17 +28,18 @@ class RetailSecurityError extends PaymentPageSection {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Icon(
-              Icons.warning_amber_rounded,
-              color: tokens.securityErrorForeground,
+              feedback.isPositive
+                  ? Icons.check_circle_outline
+                  : Icons.error_outline,
             ),
             SizedBox(width: tokens.itemSpacing),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(data.title, style: theme.textTheme.titleMedium),
+                  Text(feedback.title, style: theme.textTheme.titleMedium),
                   SizedBox(height: tokens.itemSpacing),
-                  Text(data.message),
+                  Text(feedback.message),
                 ],
               ),
             ),

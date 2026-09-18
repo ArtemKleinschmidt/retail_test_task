@@ -9,9 +9,17 @@ final TenantConfig _retailTenant = TenantConfig(
 
 final AppFlavor _retailFlavor = AppFlavor(
   tenant: _retailTenant,
-  paymentComponents: const PaymentTenantComponents(
-    paymentSupplement: RetailPromoBannerStrategy(),
-    securityError: RetailSecurityErrorStrategy(),
+  paymentComponents: PaymentTenantComponents(
+    sections: const [
+      PaymentPageHeadingSection(),
+      RetailPromoBanner(),
+      PaymentSummarySection(),
+      PaymentSecurityOverviewSection(),
+      RetailSecurityError(),
+      PaymentProgressSection(),
+      PaymentResultSection(),
+      PaymentActionSection(),
+    ],
   ),
 );
 

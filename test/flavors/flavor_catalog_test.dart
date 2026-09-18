@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:retail_test_task/core/tenant/tenant_config.dart';
 import 'package:retail_test_task/core/tenant/tenant_design_tokens.dart';
+import 'package:retail_test_task/features/payment/presentation/widgets/payment_page_sections.dart';
 import 'package:retail_test_task/flavors/flavor_catalog.dart';
-import 'package:retail_test_task/flavors/retail/retail_payment_components.dart';
-import 'package:retail_test_task/flavors/utility/utility_payment_components.dart';
+import 'package:retail_test_task/flavors/retail/retail_promo_banner.dart';
+import 'package:retail_test_task/flavors/retail/retail_security_error.dart';
+import 'package:retail_test_task/flavors/utility/utility_bill_breakdown.dart';
+import 'package:retail_test_task/flavors/utility/utility_security_error.dart';
 
 void main() {
   group('FlavorCatalog', () {
@@ -46,25 +49,37 @@ void main() {
       expect(utilityTokens.motionCurve, Curves.easeOut);
     });
 
-    test('registers the matching component strategies for each tenant', () {
+    test('registers each tenant payment section in display order', () {
       final retail = flavorCatalog.forTenant(TenantId.retail);
       final utility = flavorCatalog.forTenant(TenantId.utility);
 
       expect(
-        retail.paymentComponents.paymentSupplement,
-        isA<RetailPromoBannerStrategy>(),
+        retail.paymentComponents.sections.map((section) => section.runtimeType),
+        [
+          PaymentPageHeadingSection,
+          RetailPromoBanner,
+          PaymentSummarySection,
+          PaymentSecurityOverviewSection,
+          RetailSecurityError,
+          PaymentProgressSection,
+          PaymentResultSection,
+          PaymentActionSection,
+        ],
       );
       expect(
-        retail.paymentComponents.securityError,
-        isA<RetailSecurityErrorStrategy>(),
-      );
-      expect(
-        utility.paymentComponents.paymentSupplement,
-        isA<UtilityBillBreakdownStrategy>(),
-      );
-      expect(
-        utility.paymentComponents.securityError,
-        isA<UtilitySecurityErrorStrategy>(),
+        utility.paymentComponents.sections.map(
+          (section) => section.runtimeType,
+        ),
+        [
+          PaymentPageHeadingSection,
+          PaymentSummarySection,
+          PaymentSecurityOverviewSection,
+          UtilityBillBreakdown,
+          UtilitySecurityError,
+          PaymentProgressSection,
+          PaymentResultSection,
+          PaymentActionSection,
+        ],
       );
     });
   });

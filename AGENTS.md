@@ -97,6 +97,12 @@ These rules favor caution over speed. Use judgment for trivial tasks.
 - Do not add or modify tests until the user explicitly approves the proposed
   test coverage. After approval, a step is not complete until its approved
   tests and manual checks pass.
+- Do not run screenshot-based UI verification without explicit user approval.
+  This includes manual screenshot capture and automated golden or screenshot
+  tests. Before requesting approval, state the exact flavors, screens, states
+  or scenarios, viewport sizes, and whether screenshots are inspection-only
+  or will be stored as test baselines. Approval applies only to that stated
+  scope; request approval again before expanding it.
 - Cover project-owned domain, data, and independently testable platform
   behavior with unit tests. Cover BLoCs with `bloc_test` and use `mocktail`
   only at dependency boundaries.

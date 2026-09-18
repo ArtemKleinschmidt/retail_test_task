@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:retail_test_task/core/tenant/tenant_design_tokens.dart';
+import 'package:retail_test_task/features/payment/presentation/tenant/payment_page_section.dart';
 
-class RetailPromoBanner extends StatelessWidget {
+class RetailPromoBanner extends PaymentPageSection {
   const RetailPromoBanner({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final tokens = Theme.of(context).extension<TenantDesignTokens>()!;
 
     return DecoratedBox(
@@ -15,12 +17,19 @@ class RetailPromoBanner extends StatelessWidget {
       ),
       child: Padding(
         padding: EdgeInsets.all(tokens.sectionSpacing),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(Icons.local_offer_rounded, color: tokens.accent),
-            SizedBox(width: tokens.itemSpacing),
-            const Expanded(
-              child: Text('Payment confirmed today earns bonus rewards.'),
+            Text('Promo Banner', style: theme.textTheme.titleMedium),
+            SizedBox(height: tokens.itemSpacing),
+            Row(
+              children: [
+                Icon(Icons.local_offer_rounded, color: tokens.accent),
+                SizedBox(width: tokens.itemSpacing),
+                const Expanded(
+                  child: Text('Payment confirmed today earns bonus rewards.'),
+                ),
+              ],
             ),
           ],
         ),
