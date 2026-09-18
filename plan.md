@@ -77,7 +77,7 @@ Status values: `Not started`, `In progress`, `Blocked`, `Done`.
 | --- | --- | --- | --- |
 | 1 | Architecture foundation | Done | - |
 | 2 | Flavors and tenant configuration | Done | 1 |
-| 3 | Payment domain | Not started | 1 |
+| 3 | Payment domain | Done | 1 |
 | 4 | Payment BLoC | Not started | 3 |
 | 5 | Tenant payment UI | Not started | 2, 4 |
 | 6 | Security approach investigation | Not started | 1 |
@@ -162,31 +162,38 @@ conditionals.
 
 ## Step 3 - Implement the Payment Domain
 
-**Status:** Not started
+**Status:** Done
 
 **PDF mapping:** Payment Confirmation Module; Clean Architecture and SOLID
 evaluation criteria.
 
 ### Implementation
 
-- [ ] Create pure Dart payment, amount, reference, and bill-item models.
-- [ ] Create security-status, payment-progress, and payment-result models.
-- [ ] Define payment and security failures.
-- [ ] Define repository contracts in domain.
-- [ ] Add use cases for checking security and determining whether confirmation
+- [x] Create pure Dart payment, amount, reference, and bill-item models.
+- [x] Create security-status, payment-progress, and payment-result models.
+- [x] Define payment and security failures.
+- [x] Define repository contracts in domain.
+- [x] Add use cases for checking security and determining whether confirmation
       is allowed.
-- [ ] Add use cases for starting simulated processing and observing progress.
+- [x] Add use cases for starting simulated processing and observing progress.
 
 ### Verification gate
 
-- [ ] Present entity, use-case, repository-contract, and failure-propagation
+- [x] Present entity, use-case, repository-contract, and failure-propagation
       unit tests for approval.
-- [ ] Obtain approval before writing or modifying tests.
-- [ ] Run approved automated tests.
-- [ ] Inspect domain imports and dependency direction manually.
-- [ ] Run formatting and static analysis.
+- [x] Obtain approval before writing or modifying tests.
+- [x] Run approved automated tests.
+- [x] Inspect domain imports and dependency direction manually.
+- [x] Run formatting and static analysis.
 
-**Completion evidence:** _Pending_
+**Completion evidence:** Added validated, immutable payment value objects and
+entities, including integer `amountInMinorUnits` currency storage; explicit
+security signals and confirmation decisions; a sealed processing-update model;
+typed payment and security failures; repository contracts; and five focused
+use cases. The approved domain suite passed 25 tests, the complete project suite
+passed 28 tests, formatting completed, and `fvm flutter analyze` reported no
+issues. A source audit confirmed the domain imports only `equatable` and its
+own domain types.
 
 ## Step 4 - Implement the Payment BLoC
 
@@ -413,7 +420,7 @@ steps.
 | Interaction | Problem | AI contribution | Audit or correction | Evidence |
 | --- | --- | --- | --- | --- |
 | 1 | Multi-tenant flavor and theme architecture | Added flavor wiring, immutable configuration, ThemeExtension tokens, and tenant component strategies | The first Gradle build exposed that AGP 9.1 disables custom resource values by default; enabled `buildFeatures.resValues` and rebuilt both variants | Step 2 conversation, repository diff, tests, and APK build output |
-| 2 | _Pending_ | _Pending_ | _Pending_ | _Pending_ |
+| 2 | Payment-domain contracts and security policy | Added immutable value objects, typed failures, repository boundaries, use cases, and focused tests | The initial sealed processing subclasses were split across files, which Dart rejects; consolidated the union into one library and reran all verification | Step 3 conversation, repository diff, test output, and analysis output |
 | 3 | _Optional_ | _Optional_ | _Optional_ | _Optional_ |
 
 ### Deliverables
@@ -460,6 +467,9 @@ steps.
 | 2026-09-18 | Step 2 | Use separate application IDs and require explicit flavor entry points | Prevents accidental wrong-brand builds and permits side-by-side installation |
 | 2026-09-18 | Step 2 | Inject tenant components as strategies through immutable configuration | Keeps branding conditionals out of shared widgets and supports additional tenants |
 | 2026-09-18 | Step 2 | Separate the core tenant engine, payment tenant contracts, and root-level flavor composition | Keeps core feature-independent while making each concrete flavor immediately discoverable |
+| 2026-09-18 | Step 3 | Allow explicitly unsupported security signals, but propagate runtime check failures so callers fail closed | Blocks known threats and detector failures without treating an unavailable platform capability as a positive threat |
+| 2026-09-18 | Step 3 | Separate processing outcomes from infrastructure failures | Lets the BLoC distinguish a completed unsuccessful payment from repository or platform breakdowns |
+| 2026-09-18 | Step 3 refinement | Name the integer currency field `amountInMinorUnits` and document examples | Preserves precise integer money storage while making the public API self-explanatory |
 
 ## Cross-Chat Handoff Log
 
@@ -471,3 +481,4 @@ Add one concise row whenever a chat completes or hands work to another chat.
 | 2026-09-18 | Step 1 | Bootstrap, architecture folders, DI root, test policy, formatting, analysis, debug compilation, and manual launch | Start Step 2 | None |
 | 2026-09-18 | Step 2 | Android flavors, explicit entry points, tenant themes and components, approved tests, APK builds, and emulator launches | Start Step 3 | Step 3 test proposal must be approved before tests are written |
 | 2026-09-18 | Step 2 refinement | Moved tenant identity, theme, scope, and catalog into `core`; kept payment contracts and ViewData in the payment feature; moved concrete brand composition into `flavors`; analysis, tests, and both APK builds passed | Start Step 3 | Step 3 test proposal must be approved before tests are written |
+| 2026-09-18 | Step 3 | Pure-Dart payment and security models, failures, repository contracts, use cases, approved unit tests, dependency audit, formatting, and analysis | Start Step 4 | Step 4 `bloc_test` coverage must be proposed and approved before tests are written |
