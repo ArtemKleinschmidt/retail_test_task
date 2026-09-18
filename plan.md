@@ -76,7 +76,7 @@ Status values: `Not started`, `In progress`, `Blocked`, `Done`.
 | Step | Workstream | Status | Depends on |
 | --- | --- | --- | --- |
 | 1 | Architecture foundation | Done | - |
-| 2 | Flavors and tenant configuration | Not started | 1 |
+| 2 | Flavors and tenant configuration | Done | 1 |
 | 3 | Payment domain | Not started | 1 |
 | 4 | Payment BLoC | Not started | 3 |
 | 5 | Tenant payment UI | Not started | 2, 4 |
@@ -119,34 +119,46 @@ project-owned unit-testable or BLoC behavior.
 
 ## Step 2 - Implement Flavors and Tenant Configuration
 
-**Status:** Not started
+**Status:** Done
 
 **PDF mapping:** Section 3A, Multi-Tenant Architecture; third/fourth-brand
 scalability criterion.
 
 ### Implementation
 
-- [ ] Create the `retail` Android flavor and Dart entry point.
-- [ ] Create the `utility` Android flavor and Dart entry point.
-- [ ] Define immutable tenant configurations.
-- [ ] Provide colors, typography, shapes, spacing, density, and motion through
+- [x] Create the `retail` Android flavor and Dart entry point.
+- [x] Create the `utility` Android flavor and Dart entry point.
+- [x] Define immutable tenant configurations.
+- [x] Provide colors, typography, shapes, spacing, density, and motion through
       configuration and ThemeExtensions.
-- [ ] Register the promo banner, bill breakdown, and flavor-specific security
+- [x] Register the promo banner, bill breakdown, and flavor-specific security
       error presentation through tenant components.
-- [ ] Keep branding conditionals out of shared widgets.
-- [ ] Confirm both configurations support separate APK builds.
+- [x] Keep branding conditionals out of shared widgets.
+- [x] Confirm both configurations support separate APK builds.
 
 ### Verification gate
 
-- [ ] Present configuration-completeness and flavor-selection tests for
+- [x] Present configuration-completeness and flavor-selection tests for
       approval.
-- [ ] Obtain approval before writing or modifying tests.
-- [ ] Run approved automated tests.
-- [ ] Build and launch both flavors manually.
-- [ ] Confirm each flavor selects only its own configuration.
-- [ ] Run formatting and static analysis.
+- [x] Obtain approval before writing or modifying tests.
+- [x] Run approved automated tests.
+- [x] Build and launch both flavors manually.
+- [x] Confirm each flavor selects only its own configuration.
+- [x] Run formatting and static analysis.
 
-**Completion evidence:** _Pending_
+**Completion evidence:** Added separate `.retail` and `.utility` Android
+application IDs, launcher labels, explicit Dart entry points, immutable tenant
+configuration, semantic ThemeExtension tokens, TenantScope, and registered
+payment/security component strategies. `fvm dart format .`,
+`fvm flutter analyze`, and all three approved unit tests passed. Both debug APKs
+built at `build/app/outputs/flutter-apk/app-retail-debug.apk` and
+`build/app/outputs/flutter-apk/app-utility-debug.apk`. Both flavors launched on
+an Android 16 API 36 emulator with the correct title and visual configuration;
+ADB confirmed both packages were installed concurrently. The final structure
+keeps the feature-independent tenant engine in `core`, payment-specific tenant
+contracts in the payment presentation layer, and concrete brand composition in
+`flavors`; a source audit confirmed shared widgets contain no branding
+conditionals.
 
 ## Step 3 - Implement the Payment Domain
 
@@ -400,7 +412,7 @@ steps.
 
 | Interaction | Problem | AI contribution | Audit or correction | Evidence |
 | --- | --- | --- | --- | --- |
-| 1 | _Pending_ | _Pending_ | _Pending_ | _Pending_ |
+| 1 | Multi-tenant flavor and theme architecture | Added flavor wiring, immutable configuration, ThemeExtension tokens, and tenant component strategies | The first Gradle build exposed that AGP 9.1 disables custom resource values by default; enabled `buildFeatures.resValues` and rebuilt both variants | Step 2 conversation, repository diff, tests, and APK build output |
 | 2 | _Pending_ | _Pending_ | _Pending_ | _Pending_ |
 | 3 | _Optional_ | _Optional_ | _Optional_ | _Optional_ |
 
@@ -445,6 +457,9 @@ steps.
 | 2026-09-18 | Plan | Use built-in visual assets only | No external brand assets were supplied |
 | 2026-09-18 | Step 1 | Limit automation to unit and BLoC tests | User excluded widget and integration tests |
 | 2026-09-18 | Step 1 | Test only meaningful project-owned behavior | Avoid tests of framework guarantees or trivial wiring |
+| 2026-09-18 | Step 2 | Use separate application IDs and require explicit flavor entry points | Prevents accidental wrong-brand builds and permits side-by-side installation |
+| 2026-09-18 | Step 2 | Inject tenant components as strategies through immutable configuration | Keeps branding conditionals out of shared widgets and supports additional tenants |
+| 2026-09-18 | Step 2 | Separate the core tenant engine, payment tenant contracts, and root-level flavor composition | Keeps core feature-independent while making each concrete flavor immediately discoverable |
 
 ## Cross-Chat Handoff Log
 
@@ -454,3 +469,5 @@ Add one concise row whenever a chat completes or hands work to another chat.
 | --- | --- | --- | --- | --- |
 | 2026-09-18 | Planning | Requirements and implementation plan approved | Start Step 1 | Step 1 test proposal must be approved before tests are written |
 | 2026-09-18 | Step 1 | Bootstrap, architecture folders, DI root, test policy, formatting, analysis, debug compilation, and manual launch | Start Step 2 | None |
+| 2026-09-18 | Step 2 | Android flavors, explicit entry points, tenant themes and components, approved tests, APK builds, and emulator launches | Start Step 3 | Step 3 test proposal must be approved before tests are written |
+| 2026-09-18 | Step 2 refinement | Moved tenant identity, theme, scope, and catalog into `core`; kept payment contracts and ViewData in the payment feature; moved concrete brand composition into `flavors`; analysis, tests, and both APK builds passed | Start Step 3 | Step 3 test proposal must be approved before tests are written |

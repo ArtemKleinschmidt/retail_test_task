@@ -10,7 +10,18 @@ Install FVM, then use the Flutter version declared in `.fvmrc`:
 ```sh
 fvm install
 fvm flutter pub get
-fvm flutter run
+```
+
+Run the Retail Shop flavor with:
+
+```sh
+fvm flutter run --flavor retail --target lib/main_retail.dart
+```
+
+Run the Utility Pay flavor with:
+
+```sh
+fvm flutter run --flavor utility --target lib/main_utility.dart
 ```
 
 Run project checks with:

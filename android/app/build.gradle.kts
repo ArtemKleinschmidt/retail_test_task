@@ -9,6 +9,12 @@ android {
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
+    flavorDimensions += "tenant"
+
+    buildFeatures {
+        resValues = true
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -27,6 +33,19 @@ android {
         // flag during build.
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+    }
+
+    productFlavors {
+        create("retail") {
+            dimension = "tenant"
+            applicationIdSuffix = ".retail"
+            resValue("string", "app_name", "Retail Shop")
+        }
+        create("utility") {
+            dimension = "tenant"
+            applicationIdSuffix = ".utility"
+            resValue("string", "app_name", "Utility Pay")
+        }
     }
 
     buildTypes {
