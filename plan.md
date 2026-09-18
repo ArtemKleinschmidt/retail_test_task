@@ -80,7 +80,7 @@ Status values: `Not started`, `In progress`, `Blocked`, `Done`.
 | 3 | Payment domain | Done | 1 |
 | 4 | Payment BLoC | Done | 3 |
 | 5 | Tenant payment UI | In progress | 2, 4 |
-| 6 | Security approach investigation | Not started | 1 |
+| 6 | Security approach investigation | Done | 1 |
 | 7 | Kotlin security environment check | Not started | 3, 6 |
 | 8 | Payment-page window protection | Not started | 5, 7 |
 | 9 | Foreground payment processing | Not started | 4, 7 |
@@ -276,31 +276,37 @@ screenshot baselines.
 
 ## Step 6 - Investigate Android Security Checks
 
-**Status:** Not started
+**Status:** Done
 
 **PDF mapping:** Section 3B Security Environment Check; Android-depth
 evaluation criterion.
 
 ### Investigation
 
-- [ ] Review current official Android APIs and security guidance.
-- [ ] Research root-detection techniques and limitations.
-- [ ] Determine screen-recording detection support by Android version.
-- [ ] Evaluate maintained third-party libraries.
-- [ ] Compare maintenance, permissions, dependencies, privacy, compatibility,
+- [x] Review current official Android APIs and security guidance.
+- [x] Research root-detection techniques and limitations.
+- [x] Determine screen-recording detection support by Android version.
+- [x] Evaluate maintained third-party libraries.
+- [x] Compare maintenance, permissions, dependencies, privacy, compatibility,
       and known bypasses against a direct Kotlin implementation.
-- [ ] Recommend the smallest correct implementation.
-- [ ] Document reliable, heuristic, unsupported, and impossible checks.
-- [ ] Present the recommendation for approval before security implementation.
+- [x] Recommend the smallest correct implementation.
+- [x] Document reliable, heuristic, unsupported, and impossible checks.
+- [x] Present the recommendation for approval before security implementation.
 
 ### Verification gate
 
-- [ ] Review the sources, limitations, and recommendation with the user.
-- [ ] Record the approved approach in the decision log.
+- [x] Review the sources, limitations, and recommendation with the user.
+- [x] Record the approved approach in the decision log.
 
 No tests are required because this step produces no application code.
 
-**Completion evidence:** _Pending_
+**Completion evidence:** [`docs/security-approach.md`](docs/security-approach.md)
+records the API-version matrix, root-detection limits, maintained-library
+comparison, privacy and dependency implications, threading/lifecycle outline,
+and requirement traceability. The approved approach uses RootBeer 0.1.2 from
+Kotlin for heuristic root detection, the official Android API on API 35+ for
+active recording, explicit `unsupported` status below API 35, and independent
+`FLAG_SECURE` protection in Step 8. No application code or tests changed.
 
 ## Step 7 - Implement the Kotlin Security Environment Check
 
@@ -494,6 +500,9 @@ steps.
 | 2026-09-18 | Step 4 | Subscribe to processing updates before requesting processing start | Prevents early native progress from being missed and gives the BLoC ownership of subscription cleanup |
 | 2026-09-18 | Step 4 | Keep unsuccessful results separate from processing failures | Preserves the domain distinction between a completed business outcome and an infrastructure breakdown |
 | 2026-09-18 | Step 5 | Let each flavor own ordered section keys resolved by a GetIt-provided mapper | Removes widget construction and placement slots from flavor configuration while keeping ordering explicit |
+| 2026-09-18 | Step 6 | Use RootBeer 0.1.2 from Kotlin for heuristic root detection; pin the official release artifact because Maven Central publication failed | Uses the user-selected maintained detector and its current 16 KB native-library support without an unpinned repository dependency |
+| 2026-09-18 | Step 6 | Use Android's recording-visibility callback on API 35+ and return `unsupported` below API 35 | This is the only truthful public API boundary; older screenshot/display heuristics do not prove active recording |
+| 2026-09-18 | Step 6 | Keep `FLAG_SECURE` independent of recording detection | Protects the payment window across supported versions even where active-recording detection is unavailable |
 
 ## Cross-Chat Handoff Log
 
@@ -508,3 +517,4 @@ Add one concise row whenever a chat completes or hands work to another chat.
 | 2026-09-18 | Step 3 | Pure-Dart payment and security models, failures, repository contracts, use cases, approved unit tests, dependency audit, formatting, and analysis | Start Step 4 | Step 4 `bloc_test` coverage must be proposed and approved before tests are written |
 | 2026-09-18 | Step 4 | Immutable PaymentBloc events and states, security re-checks, processing orchestration and cleanup, 19 approved BLoC tests, temporary manual smoke flow, formatting, and analysis | Start Step 5 | Step 5 test coverage must be proposed and approved before tests are written |
 | 2026-09-18 | Step 5 | Shared PaymentBloc UI, debug scenario page, simulated adapters, flavor-owned ordered section keys, mapper-owned widget construction, analysis, both debug APK builds, and approved 360x640 ready-state inspections | Start Step 6 | Step 6 investigation recommendation requires approval before security implementation |
+| 2026-09-18 | Step 6 | Researched Android recording APIs and root-detection options; documented requirement traceability; approved RootBeer 0.1.2 plus the API 35 recording callback and cross-version `FLAG_SECURE` approach | Start Step 7 | Step 7 Kotlin detector and Dart channel-adapter tests must be proposed and approved before tests are written |
