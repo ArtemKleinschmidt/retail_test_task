@@ -78,7 +78,7 @@ Status values: `Not started`, `In progress`, `Blocked`, `Done`.
 | 1 | Architecture foundation | Done | - |
 | 2 | Flavors and tenant configuration | Done | 1 |
 | 3 | Payment domain | Done | 1 |
-| 4 | Payment BLoC | Not started | 3 |
+| 4 | Payment BLoC | Done | 3 |
 | 5 | Tenant payment UI | Not started | 2, 4 |
 | 6 | Security approach investigation | Not started | 1 |
 | 7 | Kotlin security environment check | Not started | 3, 6 |
@@ -197,31 +197,39 @@ own domain types.
 
 ## Step 4 - Implement the Payment BLoC
 
-**Status:** Not started
+**Status:** Done
 
 **PDF mapping:** Scalable Flutter architecture and separation of business logic
 from UI.
 
 ### Implementation
 
-- [ ] Create immutable PaymentBloc events and states.
-- [ ] Handle initial payment loading and security checking.
-- [ ] Handle confirmation requests.
-- [ ] Block confirmation for root or active screen recording.
-- [ ] Handle foreground-service progress, completion, and failure.
-- [ ] Keep business decisions in domain use cases.
+- [x] Create immutable PaymentBloc events and states.
+- [x] Handle initial payment loading and security checking.
+- [x] Handle confirmation requests.
+- [x] Block confirmation for root or active screen recording.
+- [x] Handle foreground-service progress, completion, and failure.
+- [x] Keep business decisions in domain use cases.
 
 ### Verification gate
 
-- [ ] Present `bloc_test` coverage for every event, state transition, and
+- [x] Present `bloc_test` coverage for every event, state transition, and
       failure path for approval.
-- [ ] Obtain approval before writing or modifying tests.
-- [ ] Run approved automated tests.
-- [ ] Exercise the complete state flow manually with temporary repository
+- [x] Obtain approval before writing or modifying tests.
+- [x] Run approved automated tests.
+- [x] Exercise the complete state flow manually with temporary repository
       implementations.
-- [ ] Run formatting and static analysis.
+- [x] Run formatting and static analysis.
 
-**Completion evidence:** _Pending_
+**Completion evidence:** Added immutable Equatable events and states plus a
+use-case-driven PaymentBloc that re-checks security before every confirmation,
+subscribes before processing starts, distinguishes business outcomes from
+infrastructure failures, rejects stale or duplicate work, and cleans up its
+processing subscription. All 19 approved BLoC tests passed, bringing the full
+suite to 47 passing tests. A temporary in-memory smoke harness exercised
+loading, readiness, confirmation security checking, 0/40/100 percent progress,
+and successful completion; the harness was then removed. `fvm dart format .`
+made no changes and `fvm flutter analyze` reported no issues.
 
 ## Step 5 - Build the Payment UI for Both Tenants
 
@@ -470,6 +478,9 @@ steps.
 | 2026-09-18 | Step 3 | Allow explicitly unsupported security signals, but propagate runtime check failures so callers fail closed | Blocks known threats and detector failures without treating an unavailable platform capability as a positive threat |
 | 2026-09-18 | Step 3 | Separate processing outcomes from infrastructure failures | Lets the BLoC distinguish a completed unsuccessful payment from repository or platform breakdowns |
 | 2026-09-18 | Step 3 refinement | Name the integer currency field `amountInMinorUnits` and document examples | Preserves precise integer money storage while making the public API self-explanatory |
+| 2026-09-18 | Step 4 | Re-check security immediately before every confirmation | Prevents a security status captured during initial loading from becoming a stale authorization decision |
+| 2026-09-18 | Step 4 | Subscribe to processing updates before requesting processing start | Prevents early native progress from being missed and gives the BLoC ownership of subscription cleanup |
+| 2026-09-18 | Step 4 | Keep unsuccessful results separate from processing failures | Preserves the domain distinction between a completed business outcome and an infrastructure breakdown |
 
 ## Cross-Chat Handoff Log
 
@@ -482,3 +493,4 @@ Add one concise row whenever a chat completes or hands work to another chat.
 | 2026-09-18 | Step 2 | Android flavors, explicit entry points, tenant themes and components, approved tests, APK builds, and emulator launches | Start Step 3 | Step 3 test proposal must be approved before tests are written |
 | 2026-09-18 | Step 2 refinement | Moved tenant identity, theme, scope, and catalog into `core`; kept payment contracts and ViewData in the payment feature; moved concrete brand composition into `flavors`; analysis, tests, and both APK builds passed | Start Step 3 | Step 3 test proposal must be approved before tests are written |
 | 2026-09-18 | Step 3 | Pure-Dart payment and security models, failures, repository contracts, use cases, approved unit tests, dependency audit, formatting, and analysis | Start Step 4 | Step 4 `bloc_test` coverage must be proposed and approved before tests are written |
+| 2026-09-18 | Step 4 | Immutable PaymentBloc events and states, security re-checks, processing orchestration and cleanup, 19 approved BLoC tests, temporary manual smoke flow, formatting, and analysis | Start Step 5 | Step 5 test coverage must be proposed and approved before tests are written |
