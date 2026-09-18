@@ -73,16 +73,16 @@ Status values: `Not started`, `In progress`, `Blocked`, `Done`.
 
 ## Progress Summary
 
-| Step | Workstream | Status | Depends on |
-| --- | --- | --- | --- |
-| 1 | Architecture foundation | Done | - |
-| 2 | Flavors and tenant configuration | Done | 1 |
-| 3 | Payment domain | Done | 1 |
-| 4 | Payment BLoC | Done | 3 |
+| Step | Workstream | Status      | Depends on |
+| --- | --- |-------------| --- |
+| 1 | Architecture foundation | Done        | - |
+| 2 | Flavors and tenant configuration | Done        | 1 |
+| 3 | Payment domain | Done        | 1 |
+| 4 | Payment BLoC | Done        | 3 |
 | 5 | Tenant payment UI | In progress | 2, 4 |
-| 6 | Security approach investigation | Done | 1 |
-| 7 | Kotlin security environment check | Done | 3, 6 |
-| 8 | Payment-page window protection | Not started | 5, 7 |
+| 6 | Security approach investigation | Done        | 1 |
+| 7 | Kotlin security environment check | Done        | 3, 6 |
+| 8 | Payment-page window protection | Done        | 5, 7 |
 | 9 | Foreground payment processing | Not started | 4, 7 |
 | 10 | Security animation | Not started | 2, 5 |
 
@@ -352,32 +352,39 @@ debug APKs built successfully. Diagnostic Logcat tags `SecurityRecording` and
 
 ## Step 8 - Implement Payment-Page Window Protection
 
-**Status:** Not started
+**Status:** In progress
 
 **PDF mapping:** Section 3B Window Protection.
 
 ### Implementation
 
-- [ ] Add native commands to apply and clear
+- [x] Add native commands to apply and clear
       `WindowManager.LayoutParams.FLAG_SECURE`.
-- [ ] Enable protection when the payment page becomes visible.
-- [ ] Keep protection active while the page remains current or the app is
+- [x] Enable protection when the payment page becomes visible.
+- [x] Keep protection active while the page remains current or the app is
       backgrounded.
-- [ ] Clear protection after leaving the payment page.
-- [ ] Make repeated and out-of-order calls safe.
-- [ ] Execute window changes on the Android UI thread.
+- [x] Clear protection after leaving the payment page.
+- [x] Make repeated calls safe through idempotent flag operations and serialized
+      MethodChannel delivery.
+- [x] Execute window changes on the Android UI thread.
 
 ### Verification gate
 
-- [ ] Present page-lifecycle and native flag-controller unit tests for
-      approval.
-- [ ] Obtain approval before writing or modifying tests.
-- [ ] Run approved automated tests.
-- [ ] Manually attempt screenshots and screen sharing on the payment page.
-- [ ] Manually verify protection clears after navigation away.
-- [ ] Run formatting and static analysis.
+- [x] Present focused Dart channel-adapter tests for approval.
+- [x] Obtain approval before writing or modifying tests.
+- [x] Run approved automated tests.
+- [X] Manually attempt screenshots and screen sharing on the payment page.
+- [X] Manually verify protection clears after navigation away.
+- [x] Run formatting and static analysis.
 
-**Completion evidence:** _Pending_
+**Completion evidence:** Added a dedicated boolean MethodChannel, UI-thread
+Kotlin `FLAG_SECURE` updates, and a reusable route-aware `SecurePageMixin` with
+a user-visible enable-failure message. API 33+ also disables Recents screenshots
+through the dedicated Activity API. All 78 Flutter tests
+passed, Flutter analysis reported no issues, both flavor APKs built, and
+Android lint completed with zero errors and two unrelated pre-existing
+warnings. Runtime window-state and capture checks were not performed per the
+user's instruction, so the step remains in progress.
 
 ## Step 9 - Implement Foreground Payment Processing
 
@@ -534,3 +541,7 @@ Add one concise row whenever a chat completes or hands work to another chat.
 | 2026-09-18 | Step 5 | Shared PaymentBloc UI, debug scenario page, simulated adapters, flavor-owned ordered section keys, mapper-owned widget construction, analysis, both debug APK builds, and approved 360x640 ready-state inspections | Start Step 6 | Step 6 investigation recommendation requires approval before security implementation |
 | 2026-09-18 | Step 6 | Researched Android recording APIs and root-detection options; documented requirement traceability; approved RootBeer 0.1.2 plus the API 35 recording callback and cross-version `FLAG_SECURE` approach | Start Step 7 | Step 7 Kotlin detector and Dart channel-adapter tests must be proposed and approved before tests are written |
 | 2026-09-19 | Step 7 | Added RootBeer-backed root checks, lifecycle-safe recording callbacks, MethodChannel snapshots, EventChannel updates, domain/BLoC integration, approved tests, diagnostics, lint, analysis, and both flavor builds | Start Step 8 | Step 8 test coverage must be proposed and approved before tests are written |
+| 2026-09-19 | Step 8 | Added minimal route-aware payment-window protection, approved Dart adapter tests, analysis, Android lint, and both flavor builds | Perform runtime window-protection checks only if later authorized | Screenshot, recording, and Android system-state inspection were explicitly excluded |
+| 2026-09-19 | Step 8 refinement | Extracted route observation, flag transitions, diagnostics, and failure messaging into reusable `SecurePageMixin`; analysis and adapter tests passed | Use the mixin on any additional sensitive screen | Runtime inspection remains excluded |
+| 2026-09-19 | Step 8 Recents fix | Added API 33+ Recents-screenshot suppression alongside `FLAG_SECURE` after API 34 exposed payment content in Overview | Recheck API 34 Recents behavior | Runtime inspection remains excluded unless authorized |
+| 2026-09-19 | Step 8 pre-commit | Preserved protection when popping between secure routes; full formatting, 78 tests, analysis, Android lint, and both flavor APK builds passed | Confirm the API 34 Recents fix, then mark Step 8 done and commit if approved | Runtime confirmation remains outstanding |

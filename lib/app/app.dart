@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:retail_test_task/core/navigation/app_route_observer.dart';
 import 'package:retail_test_task/core/tenant/tenant_config.dart';
 import 'package:retail_test_task/core/tenant/tenant_scope.dart';
 import 'package:retail_test_task/features/payment/debug/payment_debug_bloc_factory.dart';
@@ -28,6 +29,7 @@ class PaymentPortalApp extends StatelessWidget {
         child: MaterialApp(
           title: tenant.appName,
           debugShowCheckedModeBanner: false,
+          navigatorObservers: [appRouteObserver],
           theme: tenant.theme,
           home: PaymentFlow(
             createBloc: createPaymentBloc,

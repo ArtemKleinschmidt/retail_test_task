@@ -15,7 +15,8 @@ the existing domain repository boundary:
    infer recording from screenshot callbacks, displays, processes, or app
    inventories.
 4. Keep `FLAG_SECURE` as an independent protection in Step 8 on every supported
-   Android version. Detection and prevention are separate controls.
+   Android version. On API 33+, also disable Recents screenshots while the
+   payment route is current. Detection and prevention are separate controls.
 
 RootBeer 0.1.2 is the approved version because its March 2026 release added
 `/system_ext/bin` coverage and 16 KB native-library page-size support. Although
@@ -104,7 +105,7 @@ that common Java/native checks can be hooked or hidden.
 | Use Kotlin for Android system integration | Covered | Kotlin owns RootBeer invocation, screen-recording lifecycle, MethodChannel/EventChannel handling, and `FLAG_SECURE` window calls. RootBeer is an implementation dependency, not a replacement for the Kotlin bridge. |
 | MethodChannel detects a rooted device | Covered heuristically on API 24+ | Step 7 calls RootBeer `isRooted()` off the UI thread, maps `true`/`false` to typed channel data, and preserves native failures. As with every local root detector, “clear” is not cryptographic proof. |
 | MethodChannel detects an active screen recorder | Covered on API 35+; explicitly unsupported on API 24-34 | Step 7 caches the official `WindowManager` recording-visibility callback state and includes it in the same typed channel result. No truthful public equivalent exists on older versions. |
-| Automatically apply `FLAG_SECURE` while the Payment Page is visible | Covered by Step 8 | Page visibility will call Kotlin through the native bridge; Kotlin will set the flag on the Android UI thread, keep it while the page is current/backgrounded, and clear it only after leaving. Repeated or out-of-order calls will be idempotent. |
+| Automatically apply `FLAG_SECURE` while the Payment Page is visible | Covered by Step 8 | Page visibility calls Kotlin through the native bridge; Kotlin sets the flag on the Android UI thread, keeps it while the page is current/backgrounded, and clears it only after leaving. API 33+ also disables the Activity screenshot used by Recents. |
 | Prevent screenshots/screen-sharing | Covered as platform mitigation | `FLAG_SECURE` prevents the protected window from appearing in screenshots and non-secure displays. Android documents limitations on some older/OEM devices, so it is a mitigation rather than an absolute guarantee. |
 
 ## Sources
@@ -114,6 +115,7 @@ that common Java/native checks can be hooked or hidden.
 - [Android permission reference](https://developer.android.com/reference/android/Manifest.permission#DETECT_SCREEN_RECORDING)
 - [Android 14 screenshot callback](https://developer.android.com/reference/android/app/Activity.ScreenCaptureCallback)
 - [Android guidance for securing sensitive activities](https://developer.android.com/security/fraud-prevention/activities)
+- [Android `Activity.setRecentsScreenshotEnabled` API](https://developer.android.com/reference/android/app/Activity#setRecentsScreenshotEnabled(boolean))
 - [Flutter platform-channel threading](https://docs.flutter.dev/platform-integration/platform-channels#channels-and-platform-threading)
 - [Play Integrity overview](https://developer.android.com/google/play/integrity/overview)
 - [Play Integrity standard request and server verification](https://developer.android.com/google/play/integrity/standard)

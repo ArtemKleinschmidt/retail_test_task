@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
+import 'package:retail_test_task/core/platform/secure_page_mixin.dart';
 import 'package:retail_test_task/core/tenant/tenant_design_tokens.dart';
 import 'package:retail_test_task/core/tenant/tenant_scope.dart';
 import 'package:retail_test_task/features/payment/debug/payment_debug_scenario.dart';
@@ -34,11 +35,17 @@ class PaymentFlow extends StatelessWidget {
   }
 }
 
-class PaymentPage extends StatelessWidget {
+class PaymentPage extends StatefulWidget {
   const PaymentPage({this.createDebugBloc, super.key});
 
   final PaymentScenarioBlocFactory? createDebugBloc;
 
+  @override
+  State<PaymentPage> createState() => _PaymentPageState();
+}
+
+class _PaymentPageState extends State<PaymentPage>
+    with SecurePageMixin<PaymentPage> {
   @override
   Widget build(BuildContext context) {
     final tenant = TenantScope.of(context);
@@ -49,7 +56,7 @@ class PaymentPage extends StatelessWidget {
       appBar: AppBar(
         title: Text(tenant.appName),
         actions: [
-          if (kDebugMode && createDebugBloc != null)
+          if (kDebugMode && widget.createDebugBloc != null)
             IconButton(
               tooltip: 'Open payment scenarios',
               onPressed: () => _openDebugPage(context),
@@ -82,7 +89,7 @@ class PaymentPage extends StatelessWidget {
   }
 
   void _openDebugPage(BuildContext context) {
-    final debugBlocFactory = createDebugBloc;
+    final debugBlocFactory = widget.createDebugBloc;
     if (debugBlocFactory == null) {
       return;
     }
