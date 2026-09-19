@@ -83,7 +83,7 @@ Status values: `Not started`, `In progress`, `Blocked`, `Done`.
 | 6 | Security approach investigation | Done        | 1 |
 | 7 | Kotlin security environment check | Done        | 3, 6 |
 | 8 | Payment-page window protection | Done        | 5, 7 |
-| 9 | Foreground payment processing | Not started | 4, 7 |
+| 9 | Foreground payment processing | Done        | 4, 7 |
 | 10 | Security animation | Not started | 2, 5 |
 
 ## Step 1 - Establish the Architecture Foundation
@@ -388,32 +388,52 @@ user's instruction, so the step remains in progress.
 
 ## Step 9 - Implement Foreground Payment Processing
 
-**Status:** Not started
+**Status:** Done
 
 **PDF mapping:** Section 3B Foreground Service; service lifecycle and modern API
 compliance evaluation.
 
 ### Implementation
 
-- [ ] Create a Kotlin foreground service for deterministic simulated payment
+- [x] Create a Kotlin foreground service for deterministic simulated payment
       processing.
-- [ ] Display a persistent system notification with a progress bar.
-- [ ] Apply current Android notification and foreground-service requirements.
-- [ ] Send progress and completion to Flutter.
-- [ ] Connect native progress through data and domain to PaymentBloc.
-- [ ] Keep both flavors independently buildable as APKs.
+- [x] Display a persistent system notification with a progress bar.
+- [x] Apply current Android notification and foreground-service requirements.
+- [x] Send progress and completion to Flutter.
+- [x] Connect native progress through data and domain to PaymentBloc.
+- [x] Keep both flavors independently buildable as APKs.
 
 ### Verification gate
 
-- [ ] Present Kotlin service, Dart adapter, and PaymentBloc progress tests for
-      approval.
-- [ ] Obtain approval before writing or modifying tests.
-- [ ] Run approved automated tests.
-- [ ] Manually verify notification progress, background processing, resume,
+- [x] Present Dart adapter coverage and confirm the existing PaymentBloc
+      progress coverage; no Kotlin tests were approved.
+- [x] Obtain approval before writing or modifying tests.
+- [x] Run approved automated tests.
+- [x] Manually verify notification progress, background processing, resume,
       rotation, and completion.
-- [ ] Run formatting and static analysis.
+- [x] Run formatting and static analysis.
 
-**Completion evidence:** _Pending_
+**Completion evidence:** Added an API-compliant `shortService`, strongest
+available sticky-notification flags, notification permission request that does
+not block processing when denied, deterministic 20/45/70/100 percent progress,
+structured coroutine scopes with cancellable delays, Mutex-protected native
+coordination, main-thread EventChannel delivery, typed Dart channel mapping,
+and production dependency injection while retaining simulated debug scenarios.
+The notification uses a high-importance channel, flavor-specific titles and
+accent colors, and the resolved flavor launcher resource for both its small and
+large icon slots. Payment content renders directly without an AnimatedSwitcher,
+and the page owns an explicit ScrollController backed by a stable page-storage
+key. Security re-check and completion states preserve the status, progress, and
+action sections so the list extent does not collapse and clamp that preserved
+position. Successful completion keeps a disabled `Payment completed` button.
+Retail and Utility provide distinct density-specific native launcher icons
+through their Android flavor source sets.
+The 12 approved adapter tests and all 90 project tests passed; formatting and
+Flutter analysis were clean; flavor-specific Android lint passed with existing
+toolchain deprecation warnings; and both debug flavor APKs built sequentially
+and successfully.
+Per the user's instruction, Codex performed no runtime checks. The user owned
+the on-device verification and subsequently asked to finalize Step 9.
 
 ## Step 10 - Select and Implement the Security Animation
 
@@ -525,6 +545,14 @@ steps.
 | 2026-09-19 | Step 7 | Stream recording-state changes through an EventChannel while retaining MethodChannel snapshots | Keeps the UI and confirmation policy current without polling or bypassing PaymentBloc |
 | 2026-09-18 | Step 6 | Use Android's recording-visibility callback on API 35+ and return `unsupported` below API 35 | This is the only truthful public API boundary; older screenshot/display heuristics do not prove active recording |
 | 2026-09-18 | Step 6 | Keep `FLAG_SECURE` independent of recording detection | Protects the payment window across supported versions even where active-recording detection is unavailable |
+| 2026-09-19 | Step 9 | Use an Android `shortService` with ongoing and no-clear notification flags while leaving the service itself non-sticky | Matches the brief user-initiated payment simulation and applies the strongest standard sticky-notification behavior available on current Android |
+| 2026-09-19 | Step 9 | Request notification permission but continue processing when it is denied | Foreground processing remains valid and visible through Active apps even when Android suppresses the notification drawer entry |
+| 2026-09-19 | Step 9 refinement | Use lifecycle-owned coroutine scopes for service and channel work, and a coroutine `Mutex` for coordinator state | Provides cancellable non-blocking progress timing and removes raw executor, handler, atomic, and synchronized concurrency primitives |
+| 2026-09-19 | Step 9 notification refinement | Move processing alerts to a fresh high-importance channel and apply flavor-specific titles, accents, and a custom payment badge | Android persists channel importance after creation, so changing the original channel in place could not enable heads-up presentation on existing installs |
+| 2026-09-19 | Step 9 color refinement | Define notification accent, badge-background, and badge-foreground colors in native `retail` and `utility` resource overlays, with neutral `main` fallbacks | Keeps flavor styling in Android's resource system and lets the service consume the resolved palette without flavor conditionals |
+| 2026-09-19 | Step 9 API 36.1 refinement | Remove the payment-content AnimatedSwitcher, bind the list to a page-owned ScrollController plus page-storage key, and resolve both notification icon slots from the flavor launcher resource | Makes the scroll position explicit across BLoC states and removes ambiguity about which icon Android chooses in different notification layouts |
+| 2026-09-19 | Step 9 scroll refinement | Preserve the last security status during re-check and completion, retain completed progress at 100%, and keep a disabled success button | Prevents the list extent from shrinking and clamping the otherwise-preserved scroll offset |
+| 2026-09-19 | Flavor icon refinement | Override `ic_launcher` in each native Android flavor source set with a simple density-specific branded mark | Gives installed Retail and Utility applications distinct launcher identities without runtime flavor conditionals |
 
 ## Cross-Chat Handoff Log
 
@@ -545,3 +573,10 @@ Add one concise row whenever a chat completes or hands work to another chat.
 | 2026-09-19 | Step 8 refinement | Extracted route observation, flag transitions, diagnostics, and failure messaging into reusable `SecurePageMixin`; analysis and adapter tests passed | Use the mixin on any additional sensitive screen | Runtime inspection remains excluded |
 | 2026-09-19 | Step 8 Recents fix | Added API 33+ Recents-screenshot suppression alongside `FLAG_SECURE` after API 34 exposed payment content in Overview | Recheck API 34 Recents behavior | Runtime inspection remains excluded unless authorized |
 | 2026-09-19 | Step 8 pre-commit | Preserved protection when popping between secure routes; full formatting, 78 tests, analysis, Android lint, and both flavor APK builds passed | Confirm the API 34 Recents fix, then mark Step 8 done and commit if approved | Runtime confirmation remains outstanding |
+| 2026-09-19 | Step 9 automated implementation | Added the foreground payment service, sticky progress notification, native channels, production repository adapter, 12 approved adapter tests, clean analysis, flavor lint, and both debug APK builds | User performs the agreed manual notification and lifecycle checks | Manual confirmation is required before marking Step 9 done |
+| 2026-09-19 | Step 9 coroutine refinement | Replaced raw concurrency primitives with service/channel coroutine scopes, cancellable delays, and Mutex-protected coordinator state; all 90 tests, analysis, flavor lint, and both builds passed | User performs the agreed manual notification and lifecycle checks | Manual confirmation is required before marking Step 9 done |
+| 2026-09-19 | Step 9 notification refinement | Added a fresh high-importance channel, heads-up priority, Retail orange and Utility navy styling, flavor titles, and a custom payment badge; all 90 tests, analysis, flavor lint, and both APK builds passed | User verifies heads-up behavior and styling on-device | Manual confirmation is required before marking Step 9 done |
+| 2026-09-19 | Step 9 color refinement | Moved notification styling into native flavor resource folders with three-color Retail and Utility palettes; all 90 tests, analysis, flavor lint, and both APK builds passed | User verifies each flavor's colors on-device | Manual confirmation is required before marking Step 9 done |
+| 2026-09-19 | Step 9 API 36.1 and icon refinement | Bound payment content to a page-owned ScrollController, resolved both notification icon slots directly from the flavor launcher resource, verified the packaged icon hashes, and built both APKs sequentially; all 90 tests, analysis, and flavor lint passed | User verifies scroll retention and the notification icon on-device | Manual confirmation remains required |
+| 2026-09-19 | Step 9 scroll-layout refinement | Kept security, 100% progress, and a disabled `Payment completed` action in the successful terminal layout so completion no longer shortens the list; all 90 tests, analysis, flavor lint, and both sequential APK builds passed | User verifies the completed layout and scroll position on-device | Manual confirmation remains required |
+| 2026-09-19 | Step 9 finalization | Recorded the user's on-device verification ownership and finalized the foreground-processing implementation | Start Step 10 | None |

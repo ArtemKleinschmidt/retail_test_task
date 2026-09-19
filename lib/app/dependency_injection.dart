@@ -1,7 +1,7 @@
 import 'package:get_it/get_it.dart';
 import 'package:retail_test_task/core/platform/window_protection.dart';
+import 'package:retail_test_task/features/payment/data/repositories/method_channel_payment_repository.dart';
 import 'package:retail_test_task/features/payment/data/repositories/method_channel_security_repository.dart';
-import 'package:retail_test_task/features/payment/data/repositories/simulated_payment_repository.dart';
 import 'package:retail_test_task/features/payment/data/sources/predefined_payment.dart';
 import 'package:retail_test_task/features/payment/domain/repositories/payment_repository.dart';
 import 'package:retail_test_task/features/payment/domain/repositories/security_repository.dart';
@@ -21,7 +21,7 @@ void registerDependencies(GetIt locator) {
     ..registerLazySingleton(PaymentPageSectionMapper.new)
     ..registerLazySingleton(WindowProtection.new)
     ..registerLazySingleton<PaymentRepository>(
-      () => SimulatedPaymentRepository(payment: createPredefinedPayment()),
+      () => MethodChannelPaymentRepository(payment: createPredefinedPayment()),
     )
     ..registerLazySingleton<SecurityRepository>(
       MethodChannelSecurityRepository.new,

@@ -130,12 +130,20 @@ final class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
     PaymentConfirmationRequested event,
     Emitter<PaymentState> emit,
   ) async {
-    final payment = _paymentEligibleForConfirmation(state);
+    final previousState = state;
+    final payment = _paymentEligibleForConfirmation(previousState);
     if (payment == null) {
       return;
     }
 
-    emit(PaymentCheckingSecurity(payment));
+    emit(
+      PaymentCheckingSecurity(
+        payment,
+        previousSecurityStatus: previousState is PaymentContentState
+            ? previousState.visibleSecurityStatus
+            : null,
+      ),
+    );
 
     final SecurityStatus securityStatus;
     try {
@@ -214,7 +222,13 @@ final class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
         );
       case PaymentResult(:final outcome):
         await _cancelProcessingSubscription();
-        emit(PaymentCompleted(payment: currentState.payment, outcome: outcome));
+        emit(
+          PaymentCompleted(
+            payment: currentState.payment,
+            outcome: outcome,
+            securityStatus: currentState.securityStatus,
+          ),
+        );
     }
   }
 

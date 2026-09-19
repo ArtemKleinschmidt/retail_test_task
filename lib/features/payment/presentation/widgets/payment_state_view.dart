@@ -10,12 +10,14 @@ class PaymentStateView extends StatelessWidget {
   const PaymentStateView({
     required this.state,
     required this.sectionMapper,
+    required this.contentScrollController,
     required this.onPaymentAction,
     super.key,
   });
 
   final PaymentState state;
   final PaymentPageSectionMapper sectionMapper;
+  final ScrollController contentScrollController;
   final VoidCallback onPaymentAction;
 
   @override
@@ -35,6 +37,7 @@ class PaymentStateView extends StatelessWidget {
       PaymentContentState contentState => _PaymentContentView(
         state: contentState,
         sectionMapper: sectionMapper,
+        scrollController: contentScrollController,
         onPaymentAction: onPaymentAction,
       ),
     };
@@ -45,11 +48,13 @@ class _PaymentContentView extends StatelessWidget {
   const _PaymentContentView({
     required this.state,
     required this.sectionMapper,
+    required this.scrollController,
     required this.onPaymentAction,
   });
 
   final PaymentContentState state;
   final PaymentPageSectionMapper sectionMapper;
+  final ScrollController scrollController;
   final VoidCallback onPaymentAction;
 
   @override
@@ -64,6 +69,8 @@ class _PaymentContentView extends StatelessWidget {
     return PaymentPageSectionScope(
       state: state,
       child: ListView.separated(
+        key: const PageStorageKey<String>('payment-content'),
+        controller: scrollController,
         padding: EdgeInsets.all(tokens.screenPadding),
         itemCount: sections.length,
         itemBuilder: (_, index) => sections[index],

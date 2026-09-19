@@ -1,6 +1,7 @@
 package com.example.retail_test_task
 
 import android.view.WindowManager
+import com.example.retail_test_task.payment.PaymentProcessingChannel
 import com.example.retail_test_task.security.ScreenRecordingMonitor
 import com.example.retail_test_task.security.SecurityEnvironmentChannel
 import com.example.retail_test_task.security.WindowProtectionChannel
@@ -12,6 +13,7 @@ class MainActivity : FlutterActivity() {
     private var securityEnvironmentChannel: SecurityEnvironmentChannel? = null
     private var screenRecordingMonitor: ScreenRecordingMonitor? = null
     private var windowProtectionChannel: WindowProtectionChannel? = null
+    private var paymentProcessingChannel: PaymentProcessingChannel? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -30,6 +32,21 @@ class MainActivity : FlutterActivity() {
             messenger = flutterEngine.dartExecutor.binaryMessenger,
             activity = this,
         )
+        paymentProcessingChannel = PaymentProcessingChannel(
+            messenger = flutterEngine.dartExecutor.binaryMessenger,
+            activity = this,
+        )
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray,
+    ) {
+        if (paymentProcessingChannel?.onRequestPermissionsResult(requestCode) == true) {
+            return
+        }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
     override fun onStart() {
@@ -46,8 +63,10 @@ class MainActivity : FlutterActivity() {
         screenRecordingMonitor?.stop()
         securityEnvironmentChannel?.dispose()
         windowProtectionChannel?.dispose()
+        paymentProcessingChannel?.dispose()
         securityEnvironmentChannel = null
         windowProtectionChannel = null
+        paymentProcessingChannel = null
         screenRecordingMonitor = null
         super.cleanUpFlutterEngine(flutterEngine)
     }

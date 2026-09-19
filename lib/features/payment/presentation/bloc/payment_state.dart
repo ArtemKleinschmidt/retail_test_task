@@ -67,7 +67,13 @@ final class PaymentReady extends PaymentContentState {
 }
 
 final class PaymentCheckingSecurity extends PaymentContentState {
-  const PaymentCheckingSecurity(Payment payment) : super(payment: payment);
+  const PaymentCheckingSecurity(Payment payment, {this.previousSecurityStatus})
+    : super(payment: payment);
+
+  final SecurityStatus? previousSecurityStatus;
+
+  @override
+  SecurityStatus? get visibleSecurityStatus => previousSecurityStatus;
 
   @override
   bool get isCheckingSecurity => true;
@@ -164,9 +170,20 @@ final class PaymentProcessing extends PaymentContentState {
 }
 
 final class PaymentCompleted extends PaymentContentState {
-  const PaymentCompleted({required super.payment, required this.outcome});
+  const PaymentCompleted({
+    required super.payment,
+    required this.outcome,
+    this.securityStatus,
+  });
 
   final PaymentOutcome outcome;
+  final SecurityStatus? securityStatus;
+
+  @override
+  SecurityStatus? get visibleSecurityStatus => securityStatus;
+
+  @override
+  int get processingPercentage => 100;
 
   @override
   PaymentFeedbackViewData get feedback => switch (outcome) {
@@ -183,13 +200,16 @@ final class PaymentCompleted extends PaymentContentState {
   };
 
   @override
-  PaymentActionViewData? get primaryAction {
-    if (outcome == PaymentOutcome.success) {
-      return null;
-    }
-
-    return const PaymentActionViewData(label: 'Try again', isEnabled: true);
-  }
+  PaymentActionViewData get primaryAction => switch (outcome) {
+    PaymentOutcome.success => const PaymentActionViewData(
+      label: 'Payment completed',
+      isEnabled: false,
+    ),
+    PaymentOutcome.failure => const PaymentActionViewData(
+      label: 'Try again',
+      isEnabled: true,
+    ),
+  };
 
   @override
   List<Object> get props => [payment, outcome];

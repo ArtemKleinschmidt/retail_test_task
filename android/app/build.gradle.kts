@@ -40,11 +40,13 @@ android {
             dimension = "tenant"
             applicationIdSuffix = ".retail"
             resValue("string", "app_name", "Retail Shop")
+            resValue("string", "payment_notification_title", "Secure checkout")
         }
         create("utility") {
             dimension = "tenant"
             applicationIdSuffix = ".utility"
             resValue("string", "app_name", "Utility Pay")
+            resValue("string", "payment_notification_title", "Bill payment")
         }
     }
 
@@ -69,4 +71,5 @@ flutter {
 
 dependencies {
     implementation("com.scottyab:rootbeer-lib:0.1.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1")
 }
