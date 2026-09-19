@@ -62,7 +62,7 @@ class _PaymentPageState extends State<PaymentPage>
       appBar: AppBar(
         title: Text(tenant.appName),
         actions: [
-          if (kDebugMode && widget.createDebugBloc != null)
+          if (!kReleaseMode && widget.createDebugBloc != null)
             IconButton(
               tooltip: 'Open payment scenarios',
               onPressed: () => _openDebugPage(context),

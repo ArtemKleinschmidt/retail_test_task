@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:retail_test_task/core/tenant/tenant_design_tokens.dart';
 import 'package:retail_test_task/features/payment/domain/entities/security_status.dart';
+import 'package:retail_test_task/features/payment/presentation/bloc/payment_bloc.dart';
 import 'package:retail_test_task/features/payment/presentation/tenant/payment_page_section.dart';
 import 'package:retail_test_task/features/payment/presentation/tenant/payment_page_section_key.dart';
+import 'package:retail_test_task/features/payment/presentation/widgets/security_radar_sweep.dart';
 
 class PaymentSecurityOverviewSection extends PaymentPageSection {
   const PaymentSecurityOverviewSection({super.key});
@@ -40,22 +42,36 @@ class PaymentSecurityOverviewSection extends PaymentPageSection {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Security scan', style: theme.textTheme.titleMedium),
-                      Text(
-                        state.isCheckingSecurity
-                            ? 'Checking the payment environment…'
-                            : 'Device safeguards are evaluated before payment.',
+                      AnimatedSwitcher(
+                        duration: tokens.shortDuration,
+                        switchInCurve: tokens.motionCurve,
+                        switchOutCurve: tokens.motionCurve,
+                        transitionBuilder: (child, animation) =>
+                            FadeTransition(opacity: animation, child: child),
+                        layoutBuilder: (currentChild, previousChildren) {
+                          return Stack(
+                            alignment: Alignment.centerLeft,
+                            children: [...previousChildren, ?currentChild],
+                          );
+                        },
+                        child: Text(
+                          state.isCheckingSecurity
+                              ? 'Security scan in progress'
+                              : 'Security scan',
+                          key: ValueKey(state.isCheckingSecurity),
+                          style: theme.textTheme.titleMedium,
+                        ),
+                      ),
+                      const Text(
+                        'Device safeguards are evaluated before payment.',
                       ),
                     ],
                   ),
                 ),
-                if (state.isCheckingSecurity)
-                  const SizedBox.square(
-                    dimension: 24,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
               ],
             ),
+            SizedBox(height: tokens.sectionSpacing),
+            SecurityRadarSweep(mode: _radarModeFor(state)),
             if (status != null) ...[
               SizedBox(height: tokens.sectionSpacing),
               Wrap(
@@ -77,6 +93,21 @@ class PaymentSecurityOverviewSection extends PaymentPageSection {
   }
 }
 
+SecurityRadarMode _radarModeFor(PaymentContentState state) {
+  return switch (state) {
+    PaymentCheckingSecurity() => SecurityRadarMode.scanning,
+    PaymentReady() || PaymentProcessing() => SecurityRadarMode.monitoring,
+    PaymentConfirmationBlocked() ||
+    PaymentSecurityCheckFailed() => SecurityRadarMode.blocked,
+    PaymentCompleted(securityStatus: final status?)
+        when status.root == SecuritySignalState.detected ||
+            status.screenRecording == SecuritySignalState.detected =>
+      SecurityRadarMode.blocked,
+    PaymentCompleted() => SecurityRadarMode.resolved,
+    PaymentProcessingFailed() => SecurityRadarMode.unavailable,
+  };
+}
+
 class _SecuritySignal extends StatelessWidget {
   const _SecuritySignal({required this.label, required this.state});
 
@@ -91,7 +122,7 @@ class _SecuritySignal extends StatelessWidget {
       SecuritySignalState.clear => (
         Icons.check_circle_outline,
         'Clear',
-        theme.colorScheme.primary,
+        Colors.green.shade700,
       ),
       SecuritySignalState.detected => (
         Icons.error_outline,
@@ -110,6 +141,11 @@ class _SecuritySignal extends StatelessWidget {
       child: Chip(
         avatar: Icon(icon, size: 18, color: color),
         label: Text('$label · $value'),
+        backgroundColor: Color.alphaBlend(
+          tokens.accentContainer.withAlpha(120),
+          theme.colorScheme.surfaceContainerLow,
+        ),
+        side: BorderSide(color: tokens.accent.withAlpha(56)),
       ),
     );
   }

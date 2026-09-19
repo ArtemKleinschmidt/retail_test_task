@@ -14,9 +14,11 @@ class PaymentResultSection extends PaymentPageSection {
 
   @override
   Widget build(BuildContext context) {
-    final feedback = PaymentPageSectionScope.of(context).state.feedback!;
+    final state = PaymentPageSectionScope.of(context).state;
+    final feedback = state.feedback!;
     final theme = Theme.of(context);
     final tokens = theme.extension<TenantDesignTokens>()!;
+    final isCompleted = state is PaymentCompleted;
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -26,23 +28,36 @@ class PaymentResultSection extends PaymentPageSection {
         borderRadius: BorderRadius.circular(tokens.cardRadius),
       ),
       child: Padding(
-        padding: EdgeInsets.all(tokens.sectionSpacing),
+        padding: EdgeInsets.all(
+          isCompleted ? tokens.itemSpacing : tokens.sectionSpacing,
+        ),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: isCompleted
+              ? CrossAxisAlignment.center
+              : CrossAxisAlignment.start,
           children: [
             Icon(
               feedback.isPositive
                   ? Icons.check_circle_outline
                   : Icons.error_outline,
+              size: isCompleted ? 20 : null,
             ),
             SizedBox(width: tokens.itemSpacing),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(feedback.title, style: theme.textTheme.titleMedium),
-                  SizedBox(height: tokens.itemSpacing),
-                  Text(feedback.message),
+                  Text(
+                    feedback.title,
+                    style: isCompleted
+                        ? theme.textTheme.labelLarge
+                        : theme.textTheme.titleMedium,
+                  ),
+                  SizedBox(height: isCompleted ? 2 : tokens.itemSpacing),
+                  Text(
+                    feedback.message,
+                    style: isCompleted ? theme.textTheme.bodySmall : null,
+                  ),
                 ],
               ),
             ),

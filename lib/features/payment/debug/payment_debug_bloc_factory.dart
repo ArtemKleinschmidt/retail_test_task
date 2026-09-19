@@ -27,5 +27,6 @@ PaymentBloc createDebugPaymentBloc(PaymentDebugScenario scenario) {
     startPaymentProcessing: StartPaymentProcessing(paymentRepository),
     observePaymentProcessing: ObservePaymentProcessing(paymentRepository),
     observeScreenRecording: ObserveScreenRecording(securityRepository),
+    confirmationSecurityCheckDelay: const Duration(seconds: 3),
   );
 }

@@ -84,7 +84,7 @@ Status values: `Not started`, `In progress`, `Blocked`, `Done`.
 | 7 | Kotlin security environment check | Done        | 3, 6 |
 | 8 | Payment-page window protection | Done        | 5, 7 |
 | 9 | Foreground payment processing | Done        | 4, 7 |
-| 10 | Security animation | Not started | 2, 5 |
+| 10 | Security animation | Done        | 2, 5 |
 
 ## Step 1 - Establish the Architecture Foundation
 
@@ -352,7 +352,7 @@ debug APKs built successfully. Diagnostic Logcat tags `SecurityRecording` and
 
 ## Step 8 - Implement Payment-Page Window Protection
 
-**Status:** In progress
+**Status:** Done
 
 **PDF mapping:** Section 3B Window Protection.
 
@@ -437,38 +437,53 @@ the on-device verification and subsequently asked to finalize Step 9.
 
 ## Step 10 - Select and Implement the Security Animation
 
-**Status:** Not started
+**Status:** In progress
 
 **PDF mapping:** Section 3C Custom Graphics and Optimization; performance
 evaluation criterion.
 
 ### Concept approval
 
-- [ ] Propose several focused animation concepts.
-- [ ] Describe each concept's visual behavior, painter mathematics, complexity,
+- [x] Propose several focused animation concepts.
+- [x] Describe each concept's visual behavior, painter mathematics, complexity,
       and performance implications.
-- [ ] Obtain the user's animation selection before implementation.
+- [x] Obtain the user's animation selection before implementation.
 
 ### Implementation
 
-- [ ] Implement the selected animation with CustomPainter.
-- [ ] Drive repainting directly from an animation listenable.
-- [ ] Avoid per-frame rebuilds of the surrounding widget tree.
-- [ ] Isolate the painter with RepaintBoundary.
-- [ ] Cache static drawing objects and geometry.
-- [ ] Profile the animation under payment-processing load at 60 Hz and, when
-      supported by the available device, 120 Hz.
+- [x] Implement the selected animation with CustomPainter.
+- [x] Drive repainting directly from an animation listenable.
+- [x] Avoid per-frame rebuilds of the surrounding widget tree.
+- [x] Isolate the painter with RepaintBoundary.
+- [x] Cache static drawing objects and geometry.
+- [x] Close the planned performance-profile check through final user acceptance;
+      no separate 60 Hz or 120 Hz trace was supplied.
 
 ### Verification gate
 
-- [ ] Present painter-math and repaint-behavior tests for approval.
-- [ ] Obtain approval before writing or modifying tests.
-- [ ] Run approved automated tests.
-- [ ] Manually profile frame timing and inspect repaint boundaries for both
-      flavors.
-- [ ] Run formatting and static analysis.
+- [x] Present painter-math and repaint-behavior tests for approval.
+- [x] Record the user's decision not to add Step 10 automated tests.
+- [x] Run the existing automated suite for regressions.
+- [x] Record the user's final manual acceptance after iterative visual and
+      transition review; no separate repaint-boundary trace was supplied.
+- [x] Run formatting and static analysis.
 
-**Completion evidence:** _Pending_
+**Completion evidence:** Implemented the selected Shield Radar Sweep as a
+presentation-only, theme-driven CustomPainter with adaptive scanning,
+monitoring, blocked, unavailable, and resolved modes. Static radar geometry is
+separate from the animation-listenable repaint layer; the animated painter is
+isolated by a RepaintBoundary and caches its paths, node positions, paints, and
+gradient shader. Reduced-motion requests resolve to a deterministic static
+frame, and offstage ticking follows TickerMode. No Step 10 tests were added per
+the user's decision. Before the subsequent manual-review refinement, all 90
+existing tests passed and both debug flavor APKs built successfully. The later
+refinement preserves dynamic recording updates after completion, provides an
+active `Pay again` action, and compacts the flavored completion message; per the
+user's instruction it received formatting and clean static analysis only, with
+no automated, build, or runtime checks. The user iteratively reviewed the live
+behavior, requested the final color and motion adjustments, and accepted the
+result on 2026-09-20 without supplying separate repaint-boundary, 60 Hz, or
+120 Hz traces.
 
 ## Ongoing Requirements
 
@@ -553,6 +568,10 @@ steps.
 | 2026-09-19 | Step 9 API 36.1 refinement | Remove the payment-content AnimatedSwitcher, bind the list to a page-owned ScrollController plus page-storage key, and resolve both notification icon slots from the flavor launcher resource | Makes the scroll position explicit across BLoC states and removes ambiguity about which icon Android chooses in different notification layouts |
 | 2026-09-19 | Step 9 scroll refinement | Preserve the last security status during re-check and completion, retain completed progress at 100%, and keep a disabled success button | Prevents the list extent from shrinking and clamping the otherwise-preserved scroll offset |
 | 2026-09-19 | Flavor icon refinement | Override `ic_launcher` in each native Android flavor source set with a simple density-specific branded mark | Gives installed Retail and Utility applications distinct launcher identities without runtime flavor conditionals |
+| 2026-09-19 | Step 10 | Animate the full-width Shield Radar Sweep only during active checks, then ease it to rest at its current phase while cross-fading to the resolved status palette | Keeps motion meaningful without abrupt resets or unnecessary idle repainting |
+| 2026-09-19 | Step 10 manual refinement | Preserve completed-state security updates, offer `Pay again` for either payment outcome, and compact only completed-result feedback | Keeps visible security information current and makes repeated manual payment checks faster without changing non-terminal failure presentation |
+| 2026-09-19 | Step 10 confirmation refinement | Keep the security subtitle structurally stable, use the radar as the sole checking indicator, and inject a three-second confirmation scan before taking the authoritative security snapshot | Removes transient header reflow while keeping the final confirmation decision current |
+| 2026-09-19 | Step 10 scan-state refinement | Fade between stable default/in-progress titles, retain the light tenant palette, use green for a clear security state, blue/tenant accent for active scanning, and red for threats; completed payments return to the same clean green state without a checkmark | Keeps the radar focused on security status instead of duplicating payment completion feedback |
 
 ## Cross-Chat Handoff Log
 
@@ -580,3 +599,13 @@ Add one concise row whenever a chat completes or hands work to another chat.
 | 2026-09-19 | Step 9 API 36.1 and icon refinement | Bound payment content to a page-owned ScrollController, resolved both notification icon slots directly from the flavor launcher resource, verified the packaged icon hashes, and built both APKs sequentially; all 90 tests, analysis, and flavor lint passed | User verifies scroll retention and the notification icon on-device | Manual confirmation remains required |
 | 2026-09-19 | Step 9 scroll-layout refinement | Kept security, 100% progress, and a disabled `Payment completed` action in the successful terminal layout so completion no longer shortens the list; all 90 tests, analysis, flavor lint, and both sequential APK builds passed | User verifies the completed layout and scroll position on-device | Manual confirmation remains required |
 | 2026-09-19 | Step 9 finalization | Recorded the user's on-device verification ownership and finalized the foreground-processing implementation | Start Step 10 | None |
+| 2026-09-19 | Step 10 implementation | Added the adaptive theme-driven Shield Radar Sweep, isolated animation repainting, cached painter geometry, clean analysis, 90 passing regression tests, and both debug flavor APKs | User performs the agreed visual, reduced-motion, repaint-boundary, and 60/120 Hz checks | Step 10 remains in progress until user-owned runtime verification is confirmed |
+| 2026-09-19 | Step 10 manual refinement | Added completed-state recording updates, threat-aware completed radar state, a compact flavored result message, and an active `Pay again` action; formatting and analysis passed | User manually verifies the requested behavior | No tests, builds, or runtime checks were run per user instruction |
+| 2026-09-19 | Step 10 color and motion refinement | Kept the radar rotating in every state, strengthened green/red status cues, and layered them over tenant-accented shield, rings, border, and background styling; formatting and analysis passed | User manually verifies both flavors and security states | No tests, builds, or runtime checks were run per user instruction |
+| 2026-09-19 | Step 10 continuity refinement | Reduced status chips to flavor-themed surfaces with semantic-color icons and replaced mode-dependent controller restarts with one continuous three-second radar cadence; formatting and analysis passed | User manually verifies chip styling and the Confirm payment transition | No tests, builds, or runtime checks were run per user instruction |
+| 2026-09-19 | Step 10 confirmation refinement | Stabilized the security heading, removed the redundant circular indicator, and added an injected three-second confirmation scan before the real security check; formatting and analysis passed | User manually verifies the Confirm payment transition and timing | No tests, builds, or runtime checks were run per user instruction |
+| 2026-09-19 | Step 10 scan-state refinement | Added an in-place title cross-fade and a high-contrast inverted tenant palette for the active scan while retaining subdued green monitoring and red threat styling; formatting and analysis passed | User manually verifies state distinction in both flavors | No tests, builds, or runtime checks were run per user instruction |
+| 2026-09-19 | Step 10 motion semantics refinement | Enabled scenario controls in profile builds, restored the light tenant radar palette, limited green to clear monitoring, changed completion to a tenant-colored check, and added cross-faded state changes with an eased stop at the current sweep phase; formatting and analysis passed | User manually verifies profile controls and radar transitions | No tests, builds, or runtime checks were run per user instruction |
+| 2026-09-19 | Step 10 status semantics refinement | Unified ready and completed radar visuals as clean green states, kept tenant blue for active scanning and red for security errors, and removed the redundant completion checkmark; formatting and analysis passed | User manually verifies the Utility radar sequence | No tests, builds, or runtime checks were run per user instruction |
+| 2026-09-19 | Step 10 scan-settle refinement | Preserved the sweep's exact phase across controller mode changes, replaced the 120 ms Utility stop with a matched 500 ms deceleration, and synchronized the blue-to-green crossfade with that settling motion; formatting and analysis passed | User manually verifies the Utility scanning-to-clear transition | No tests, builds, or runtime checks were run per user instruction |
+| 2026-09-20 | Step 10 finalization | Recorded final user acceptance after iterative manual review of radar status semantics and transition continuity | Prepare the Step 10 commit | Dedicated repaint-boundary and 60/120 Hz traces were not supplied; later refinements intentionally received no tests or builds |

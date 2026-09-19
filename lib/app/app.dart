@@ -27,6 +27,8 @@ class PaymentPortalApp extends StatelessWidget {
       child: PaymentTenantComponentsScope(
         components: paymentComponents,
         child: MaterialApp(
+          //todo remove
+          showPerformanceOverlay: true,
           title: tenant.appName,
           debugShowCheckedModeBanner: false,
           navigatorObservers: [appRouteObserver],

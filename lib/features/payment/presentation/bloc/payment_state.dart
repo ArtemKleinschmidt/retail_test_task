@@ -200,19 +200,11 @@ final class PaymentCompleted extends PaymentContentState {
   };
 
   @override
-  PaymentActionViewData get primaryAction => switch (outcome) {
-    PaymentOutcome.success => const PaymentActionViewData(
-      label: 'Payment completed',
-      isEnabled: false,
-    ),
-    PaymentOutcome.failure => const PaymentActionViewData(
-      label: 'Try again',
-      isEnabled: true,
-    ),
-  };
+  PaymentActionViewData get primaryAction =>
+      const PaymentActionViewData(label: 'Pay again', isEnabled: true);
 
   @override
-  List<Object> get props => [payment, outcome];
+  List<Object> get props => [payment, outcome, ?securityStatus];
 }
 
 final class PaymentProcessingFailed extends PaymentContentState {

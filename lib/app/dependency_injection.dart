@@ -40,6 +40,7 @@ void registerDependencies(GetIt locator) {
         startPaymentProcessing: locator(),
         observePaymentProcessing: locator(),
         observeScreenRecording: locator(),
+        confirmationSecurityCheckDelay: const Duration(seconds: 2),
       ),
     );
 }

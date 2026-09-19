@@ -31,6 +31,7 @@ final class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
     required StartPaymentProcessing startPaymentProcessing,
     required ObservePaymentProcessing observePaymentProcessing,
     required ObserveScreenRecording observeScreenRecording,
+    Duration confirmationSecurityCheckDelay = Duration.zero,
   }) {
     return PaymentBloc._(
       loadPayment,
@@ -39,6 +40,7 @@ final class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
       startPaymentProcessing,
       observePaymentProcessing,
       observeScreenRecording,
+      confirmationSecurityCheckDelay,
     );
   }
 
@@ -49,6 +51,7 @@ final class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
     this._startPaymentProcessing,
     this._observePaymentProcessing,
     this._observeScreenRecording,
+    this._confirmationSecurityCheckDelay,
   ) : super(const PaymentInitial()) {
     on<PaymentLoadRequested>(_onLoadRequested);
     on<PaymentConfirmationRequested>(_onConfirmationRequested);
@@ -79,6 +82,7 @@ final class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
   final StartPaymentProcessing _startPaymentProcessing;
   final ObservePaymentProcessing _observePaymentProcessing;
   final ObserveScreenRecording _observeScreenRecording;
+  final Duration _confirmationSecurityCheckDelay;
 
   StreamSubscription<PaymentProcessingUpdate>? _processingSubscription;
   StreamSubscription<SecuritySignalState>? _securityObservationSubscription;
@@ -91,7 +95,7 @@ final class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
       PaymentReady() ||
       PaymentConfirmationBlocked() ||
       PaymentSecurityCheckFailed() => const PaymentConfirmationRequested(),
-      PaymentCompleted(outcome: PaymentOutcome.failure) ||
+      PaymentCompleted() ||
       PaymentProcessingFailed() => const PaymentLoadRequested(),
       _ => null,
     };
@@ -144,6 +148,8 @@ final class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
             : null,
       ),
     );
+
+    await Future<void>.delayed(_confirmationSecurityCheckDelay);
 
     final SecurityStatus securityStatus;
     try {
@@ -281,6 +287,24 @@ final class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
               screenRecording: event.status,
             ),
             percentage: percentage,
+          ),
+        );
+      case PaymentCompleted(
+        :final payment,
+        :final outcome,
+        :final securityStatus,
+      ):
+        if (securityStatus == null) {
+          return;
+        }
+        emit(
+          PaymentCompleted(
+            payment: payment,
+            outcome: outcome,
+            securityStatus: SecurityStatus(
+              root: securityStatus.root,
+              screenRecording: event.status,
+            ),
           ),
         );
       default:
