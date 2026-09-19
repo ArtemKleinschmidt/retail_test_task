@@ -1,16 +1,32 @@
 import 'package:flutter/foundation.dart';
-import 'package:retail_test_task/features/payment/data/repositories/simulated_payment_repository.dart';
-import 'package:retail_test_task/features/payment/data/repositories/simulated_security_repository.dart';
+
+enum PaymentDebugLoadBehavior { success, failure }
+
+enum PaymentDebugSecurityBehavior {
+  clear,
+  unsupported,
+  rooted,
+  screenRecording,
+  rootedAndRecording,
+  failure,
+}
+
+enum PaymentDebugProcessingBehavior {
+  success,
+  declined,
+  startFailure,
+  streamFailure,
+}
 
 @immutable
 final class PaymentDebugScenario {
   const PaymentDebugScenario({
-    this.loadBehavior = SimulatedPaymentLoadBehavior.success,
-    this.securityBehavior = SimulatedSecurityBehavior.clear,
-    this.processingBehavior = SimulatedPaymentProcessingBehavior.success,
+    this.loadBehavior = PaymentDebugLoadBehavior.success,
+    this.securityBehavior = PaymentDebugSecurityBehavior.clear,
+    this.processingBehavior = PaymentDebugProcessingBehavior.success,
   });
 
-  final SimulatedPaymentLoadBehavior loadBehavior;
-  final SimulatedSecurityBehavior securityBehavior;
-  final SimulatedPaymentProcessingBehavior processingBehavior;
+  final PaymentDebugLoadBehavior loadBehavior;
+  final PaymentDebugSecurityBehavior securityBehavior;
+  final PaymentDebugProcessingBehavior processingBehavior;
 }

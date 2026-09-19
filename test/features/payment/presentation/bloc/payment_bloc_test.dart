@@ -287,6 +287,7 @@ void main() {
           (state) => state is PaymentSecurityCheckFailed,
         );
         bloc.add(const PaymentConfirmationRequested());
+        await bloc.stream.firstWhere((state) => state is PaymentProcessing);
       },
       expect: () => [
         PaymentCheckingSecurity(payment),
@@ -457,7 +458,11 @@ void main() {
           securityStatus: clearStatus,
           percentage: 75,
         ),
-        PaymentCompleted(payment: payment, outcome: PaymentOutcome.success),
+        PaymentCompleted(
+          payment: payment,
+          outcome: PaymentOutcome.success,
+          securityStatus: clearStatus,
+        ),
       ],
     );
 
@@ -482,7 +487,11 @@ void main() {
           securityStatus: clearStatus,
           percentage: 0,
         ),
-        PaymentCompleted(payment: payment, outcome: PaymentOutcome.failure),
+        PaymentCompleted(
+          payment: payment,
+          outcome: PaymentOutcome.failure,
+          securityStatus: clearStatus,
+        ),
       ],
     );
 

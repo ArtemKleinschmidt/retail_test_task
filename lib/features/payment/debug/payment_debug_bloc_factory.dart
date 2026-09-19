@@ -13,11 +13,33 @@ import 'package:retail_test_task/features/payment/presentation/bloc/payment_bloc
 PaymentBloc createDebugPaymentBloc(PaymentDebugScenario scenario) {
   final paymentRepository = SimulatedPaymentRepository(
     payment: createPredefinedPayment(),
-    loadBehavior: scenario.loadBehavior,
-    processingBehavior: scenario.processingBehavior,
+    loadBehavior: switch (scenario.loadBehavior) {
+      PaymentDebugLoadBehavior.success => SimulatedPaymentLoadBehavior.success,
+      PaymentDebugLoadBehavior.failure => SimulatedPaymentLoadBehavior.failure,
+    },
+    processingBehavior: switch (scenario.processingBehavior) {
+      PaymentDebugProcessingBehavior.success =>
+        SimulatedPaymentProcessingBehavior.success,
+      PaymentDebugProcessingBehavior.declined =>
+        SimulatedPaymentProcessingBehavior.declined,
+      PaymentDebugProcessingBehavior.startFailure =>
+        SimulatedPaymentProcessingBehavior.startFailure,
+      PaymentDebugProcessingBehavior.streamFailure =>
+        SimulatedPaymentProcessingBehavior.streamFailure,
+    },
   );
   final securityRepository = SimulatedSecurityRepository(
-    behavior: scenario.securityBehavior,
+    behavior: switch (scenario.securityBehavior) {
+      PaymentDebugSecurityBehavior.clear => SimulatedSecurityBehavior.clear,
+      PaymentDebugSecurityBehavior.unsupported =>
+        SimulatedSecurityBehavior.unsupported,
+      PaymentDebugSecurityBehavior.rooted => SimulatedSecurityBehavior.rooted,
+      PaymentDebugSecurityBehavior.screenRecording =>
+        SimulatedSecurityBehavior.screenRecording,
+      PaymentDebugSecurityBehavior.rootedAndRecording =>
+        SimulatedSecurityBehavior.rootedAndRecording,
+      PaymentDebugSecurityBehavior.failure => SimulatedSecurityBehavior.failure,
+    },
   );
 
   return PaymentBloc(

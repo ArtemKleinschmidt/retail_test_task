@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:retail_test_task/core/tenant/tenant_design_tokens.dart';
-import 'package:retail_test_task/features/payment/data/repositories/simulated_payment_repository.dart';
-import 'package:retail_test_task/features/payment/data/repositories/simulated_security_repository.dart';
 import 'package:retail_test_task/features/payment/debug/payment_debug_scenario.dart';
 import 'package:retail_test_task/features/payment/presentation/bloc/payment_bloc.dart';
 import 'package:retail_test_task/features/payment/presentation/pages/payment_page.dart';
@@ -20,11 +18,11 @@ class PaymentDebugPage extends StatefulWidget {
 }
 
 class _PaymentDebugPageState extends State<PaymentDebugPage> {
-  SimulatedPaymentLoadBehavior _loadBehavior =
-      SimulatedPaymentLoadBehavior.success;
-  SimulatedSecurityBehavior _securityBehavior = SimulatedSecurityBehavior.clear;
-  SimulatedPaymentProcessingBehavior _processingBehavior =
-      SimulatedPaymentProcessingBehavior.success;
+  PaymentDebugLoadBehavior _loadBehavior = PaymentDebugLoadBehavior.success;
+  PaymentDebugSecurityBehavior _securityBehavior =
+      PaymentDebugSecurityBehavior.clear;
+  PaymentDebugProcessingBehavior _processingBehavior =
+      PaymentDebugProcessingBehavior.success;
 
   @override
   Widget build(BuildContext context) {
@@ -45,42 +43,43 @@ class _PaymentDebugPageState extends State<PaymentDebugPage> {
               style: theme.textTheme.bodyLarge,
             ),
             SizedBox(height: tokens.sectionSpacing),
-            _ScenarioGroup<SimulatedPaymentLoadBehavior>(
+            _ScenarioGroup<PaymentDebugLoadBehavior>(
               title: 'Payment loading',
-              values: SimulatedPaymentLoadBehavior.values,
+              values: PaymentDebugLoadBehavior.values,
               selected: _loadBehavior,
               labelFor: (value) => switch (value) {
-                SimulatedPaymentLoadBehavior.success => 'Success',
-                SimulatedPaymentLoadBehavior.failure => 'Failure',
+                PaymentDebugLoadBehavior.success => 'Success',
+                PaymentDebugLoadBehavior.failure => 'Failure',
               },
               onSelected: (value) => setState(() => _loadBehavior = value),
             ),
             SizedBox(height: tokens.sectionSpacing),
-            _ScenarioGroup<SimulatedSecurityBehavior>(
+            _ScenarioGroup<PaymentDebugSecurityBehavior>(
               title: 'Security check',
-              values: SimulatedSecurityBehavior.values,
+              values: PaymentDebugSecurityBehavior.values,
               selected: _securityBehavior,
               labelFor: (value) => switch (value) {
-                SimulatedSecurityBehavior.clear => 'Clear',
-                SimulatedSecurityBehavior.unsupported => 'Unsupported',
-                SimulatedSecurityBehavior.rooted => 'Rooted',
-                SimulatedSecurityBehavior.screenRecording => 'Screen recording',
-                SimulatedSecurityBehavior.rootedAndRecording => 'Both threats',
-                SimulatedSecurityBehavior.failure => 'Check failure',
+                PaymentDebugSecurityBehavior.clear => 'Clear',
+                PaymentDebugSecurityBehavior.unsupported => 'Unsupported',
+                PaymentDebugSecurityBehavior.rooted => 'Rooted',
+                PaymentDebugSecurityBehavior.screenRecording =>
+                  'Screen recording',
+                PaymentDebugSecurityBehavior.rootedAndRecording =>
+                  'Both threats',
+                PaymentDebugSecurityBehavior.failure => 'Check failure',
               },
               onSelected: (value) => setState(() => _securityBehavior = value),
             ),
             SizedBox(height: tokens.sectionSpacing),
-            _ScenarioGroup<SimulatedPaymentProcessingBehavior>(
+            _ScenarioGroup<PaymentDebugProcessingBehavior>(
               title: 'Payment processing',
-              values: SimulatedPaymentProcessingBehavior.values,
+              values: PaymentDebugProcessingBehavior.values,
               selected: _processingBehavior,
               labelFor: (value) => switch (value) {
-                SimulatedPaymentProcessingBehavior.success => 'Success',
-                SimulatedPaymentProcessingBehavior.declined => 'Declined',
-                SimulatedPaymentProcessingBehavior.startFailure =>
-                  'Start failure',
-                SimulatedPaymentProcessingBehavior.streamFailure =>
+                PaymentDebugProcessingBehavior.success => 'Success',
+                PaymentDebugProcessingBehavior.declined => 'Declined',
+                PaymentDebugProcessingBehavior.startFailure => 'Start failure',
+                PaymentDebugProcessingBehavior.streamFailure =>
                   'Progress failure',
               },
               onSelected: (value) =>
