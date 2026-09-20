@@ -5,25 +5,36 @@ import 'package:retail_test_task/features/payment/domain/entities/payment_refere
 import 'package:retail_test_task/features/payment/domain/failures/payment_failure.dart';
 import 'package:retail_test_task/features/payment/domain/repositories/payment_repository.dart';
 
+enum MethodChannelDebugProcessingBehavior {
+  declined,
+  startFailure,
+  progressFailure,
+}
+
 final class MethodChannelPaymentRepository implements PaymentRepository {
-  MethodChannelPaymentRepository({required this.payment})
-    : _methodChannel = const MethodChannel(channelName),
-      _processingEvents = const EventChannel(eventsChannelName);
+  MethodChannelPaymentRepository({
+    required this.payment,
+    this.debugProcessingBehavior,
+  }) : _methodChannel = const MethodChannel(channelName),
+       _processingEvents = const EventChannel(eventsChannelName);
 
   MethodChannelPaymentRepository.withChannels({
     required Payment payment,
     required MethodChannel methodChannel,
     required EventChannel processingEvents,
+    MethodChannelDebugProcessingBehavior? debugProcessingBehavior,
   }) : this._(
          payment: payment,
          methodChannel: methodChannel,
          processingEvents: processingEvents,
+         debugProcessingBehavior: debugProcessingBehavior,
        );
 
   MethodChannelPaymentRepository._({
     required this.payment,
     required this._methodChannel,
     required this._processingEvents,
+    this.debugProcessingBehavior,
   });
 
   static const channelName = 'com.example.retail_test_task/payment_processing';
@@ -31,10 +42,12 @@ final class MethodChannelPaymentRepository implements PaymentRepository {
       'com.example.retail_test_task/payment_processing_events';
 
   static const _startProcessingMethod = 'startProcessing';
+  static const _debugProcessingBehaviorKey = 'debugProcessingBehavior';
   static const _startFailureMessage = 'Payment processing could not start.';
   static const _processingFailureMessage = 'Payment progress was interrupted.';
 
   final Payment payment;
+  final MethodChannelDebugProcessingBehavior? debugProcessingBehavior;
   final MethodChannel _methodChannel;
   final EventChannel _processingEvents;
 
@@ -46,6 +59,8 @@ final class MethodChannelPaymentRepository implements PaymentRepository {
     try {
       await _methodChannel.invokeMethod<void>(_startProcessingMethod, {
         'reference': reference.value,
+        if (debugProcessingBehavior case final behavior?)
+          _debugProcessingBehaviorKey: behavior.name,
       });
     } on PlatformException {
       throw const PaymentStartFailure(_startFailureMessage);

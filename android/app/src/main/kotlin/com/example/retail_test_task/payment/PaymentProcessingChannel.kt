@@ -40,7 +40,13 @@ internal class PaymentProcessingChannel(
 
         val arguments = call.arguments as? Map<*, *>
         val reference = (arguments?.get(REFERENCE_KEY) as? String)?.trim()
+        val debugProcessingBehavior =
+            (arguments?.get(DEBUG_PROCESSING_BEHAVIOR_KEY) as? String)?.trim()
         if (reference.isNullOrEmpty()) {
+            result.error(START_ERROR_CODE, START_ERROR_MESSAGE, null)
+            return
+        }
+        if (debugProcessingBehavior == DEBUG_START_FAILURE) {
             result.error(START_ERROR_CODE, START_ERROR_MESSAGE, null)
             return
         }
@@ -56,7 +62,7 @@ internal class PaymentProcessingChannel(
                 activity.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) !=
                 PackageManager.PERMISSION_GRANTED
             ) {
-                pendingStart = PendingStart(reference, result)
+                pendingStart = PendingStart(reference, debugProcessingBehavior, result)
                 try {
                     activity.requestPermissions(
                         arrayOf(Manifest.permission.POST_NOTIFICATIONS),
@@ -65,12 +71,12 @@ internal class PaymentProcessingChannel(
                 } catch (error: RuntimeException) {
                     Log.w(LOG_TAG, "notification permission request failed", error)
                     pendingStart = null
-                    launchService(reference, result)
+                    launchService(reference, debugProcessingBehavior, result)
                 }
                 return@launch
             }
 
-            launchService(reference, result)
+            launchService(reference, debugProcessingBehavior, result)
         }
     }
 
@@ -82,7 +88,7 @@ internal class PaymentProcessingChannel(
         val start = pendingStart ?: return true
         pendingStart = null
         channelScope.launch {
-            launchService(start.reference, start.result)
+            launchService(start.reference, start.debugProcessingBehavior, start.result)
         }
         return true
     }
@@ -142,10 +148,18 @@ internal class PaymentProcessingChannel(
         }
     }
 
-    private suspend fun launchService(reference: String, result: MethodChannel.Result) {
+    private suspend fun launchService(
+        reference: String,
+        debugProcessingBehavior: String?,
+        result: MethodChannel.Result,
+    ) {
         try {
             val intent = Intent(activity, PaymentProcessingService::class.java)
                 .putExtra(PaymentProcessingService.REFERENCE_EXTRA, reference)
+                .putExtra(
+                    PaymentProcessingService.DEBUG_PROCESSING_BEHAVIOR_EXTRA,
+                    debugProcessingBehavior,
+                )
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 activity.startForegroundService(intent)
             } else {
@@ -171,6 +185,7 @@ internal class PaymentProcessingChannel(
 
     private data class PendingStart(
         val reference: String,
+        val debugProcessingBehavior: String?,
         val result: MethodChannel.Result,
     )
 
@@ -181,6 +196,7 @@ internal class PaymentProcessingChannel(
             "com.example.retail_test_task/payment_processing_events"
         const val START_PROCESSING_METHOD = "startProcessing"
         const val REFERENCE_KEY = "reference"
+        const val DEBUG_PROCESSING_BEHAVIOR_KEY = "debugProcessingBehavior"
         const val TYPE_KEY = "type"
         const val PERCENTAGE_KEY = "percentage"
         const val OUTCOME_KEY = "outcome"
@@ -188,6 +204,7 @@ internal class PaymentProcessingChannel(
         const val RESULT_TYPE = "result"
         const val START_ERROR_CODE = "payment_start_failed"
         const val PROCESSING_ERROR_CODE = "payment_processing_failed"
+        const val DEBUG_START_FAILURE = "startFailure"
         const val START_ERROR_MESSAGE = "Payment processing could not start."
         const val PROCESSING_ALREADY_ACTIVE_MESSAGE =
             "Another payment is already processing."

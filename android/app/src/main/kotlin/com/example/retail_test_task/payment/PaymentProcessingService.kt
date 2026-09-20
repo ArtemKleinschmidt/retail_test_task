@@ -44,6 +44,8 @@ internal class PaymentProcessingService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val reference = intent?.getStringExtra(REFERENCE_EXTRA)?.trim()
+        val debugProcessingBehavior =
+            intent?.getStringExtra(DEBUG_PROCESSING_BEHAVIOR_EXTRA)?.trim()
         if (reference.isNullOrEmpty()) {
             stopSelf(startId)
             return START_NOT_STICKY
@@ -63,7 +65,7 @@ internal class PaymentProcessingService : Service() {
             activeReference = reference
             try {
                 promoteToForeground(reference)
-                processPayment(reference, startId)
+                processPayment(reference, startId, debugProcessingBehavior)
             } catch (error: CancellationException) {
                 throw error
             } catch (error: RuntimeException) {
@@ -116,8 +118,13 @@ internal class PaymentProcessingService : Service() {
         }
     }
 
-    private suspend fun processPayment(reference: String, startId: Int) {
+    private suspend fun processPayment(
+        reference: String,
+        startId: Int,
+        debugProcessingBehavior: String?,
+    ) {
         Log.d(LOG_TAG, "started reference=$reference")
+
         for (percentage in PROGRESS_MILESTONES) {
             delay(PROGRESS_INTERVAL_MILLIS)
             notificationManager.notify(
@@ -125,19 +132,31 @@ internal class PaymentProcessingService : Service() {
                 buildNotification(reference, percentage),
             )
             PaymentProcessingCoordinator.publishProgress(reference, percentage)
+
+            if (
+                debugProcessingBehavior == DEBUG_PROGRESS_FAILURE &&
+                percentage == DEBUG_PROGRESS_FAILURE_PERCENTAGE
+            ) {
+                fail(reference, startId, PROCESSING_FAILURE_MESSAGE)
+                return
+            }
         }
 
-        complete(reference, startId)
+        complete(
+            reference,
+            startId,
+            isApproved = debugProcessingBehavior != DEBUG_DECLINED,
+        )
     }
 
-    private suspend fun complete(reference: String, startId: Int) {
+    private suspend fun complete(reference: String, startId: Int, isApproved: Boolean) {
         if (terminated) {
             return
         }
         terminated = true
 
         Log.d(LOG_TAG, "completed reference=$reference")
-        PaymentProcessingCoordinator.complete(reference)
+        PaymentProcessingCoordinator.complete(reference, isApproved)
         stopProcessing(startId)
     }
 
@@ -227,14 +246,20 @@ internal class PaymentProcessingService : Service() {
 
     companion object {
         const val REFERENCE_EXTRA = "paymentReference"
+        const val DEBUG_PROCESSING_BEHAVIOR_EXTRA = "debugProcessingBehavior"
 
         private const val NOTIFICATION_CHANNEL_ID = "payment_processing"
         private const val NOTIFICATION_ID = 9010
         private const val CONTENT_INTENT_REQUEST_CODE = 9011
         private const val PROGRESS_INTERVAL_MILLIS = 1_500L
         private val PROGRESS_MILESTONES = listOf(20, 45, 70, 100)
+        private const val DEBUG_PROGRESS_FAILURE_PERCENTAGE = 45
+
+        private const val DEBUG_DECLINED = "declined"
+        private const val DEBUG_PROGRESS_FAILURE = "progressFailure"
 
         private const val START_FAILURE_MESSAGE = "Payment processing could not start."
+        private const val PROCESSING_FAILURE_MESSAGE = "Payment progress was interrupted."
         private const val TIMEOUT_MESSAGE = "Payment processing timed out."
         private const val INTERRUPTED_MESSAGE = "Payment processing was interrupted."
         private const val LOG_TAG = "PaymentProcessing"

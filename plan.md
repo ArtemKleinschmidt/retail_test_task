@@ -437,7 +437,7 @@ the on-device verification and subsequently asked to finalize Step 9.
 
 ## Step 10 - Select and Implement the Security Animation
 
-**Status:** In progress
+**Status:** Done
 
 **PDF mapping:** Section 3C Custom Graphics and Optimization; performance
 evaluation criterion.
@@ -492,11 +492,11 @@ steps.
 
 ### AI collaboration evidence
 
-- [ ] Capture 2-3 genuine Codex interactions involving complex work.
-- [ ] Record how AI output was reviewed and refined.
-- [ ] Record one suboptimal AI suggestion and its correction.
-- [ ] Explain the multi-tenant configuration structure.
-- [ ] Explain how AI accelerated development.
+- [X] Capture 2-3 genuine Codex interactions involving complex work.
+- [X] Record how AI output was reviewed and refined.
+- [X] Record one suboptimal AI suggestion and its correction.
+- [X] Explain the multi-tenant configuration structure.
+- [X] Explain how AI accelerated development.
 
 | Interaction | Problem | AI contribution | Audit or correction | Evidence |
 | --- | --- | --- | --- | --- |
@@ -506,11 +506,11 @@ steps.
 
 ### Deliverables
 
-- [ ] Keep the source code clean and modular.
-- [ ] Keep both flavors buildable as separate APKs.
-- [ ] Decide between APKs and a demonstration video after implementation.
-- [ ] Produce the required AI insight report from the recorded evidence.
-- [ ] Prepare the source repository or ZIP.
+- [X] Keep the source code clean and modular.
+- [X] Keep both flavors buildable as separate APKs.
+- [X] Decide between APKs and a demonstration video after implementation.
+- [X] Produce the required AI insight report from the recorded evidence.
+- [X] Prepare the source repository or ZIP.
 
 ## Requirement Coverage
 

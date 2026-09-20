@@ -50,10 +50,13 @@ internal object PaymentProcessingCoordinator {
         )
     }
 
-    suspend fun complete(reference: String) {
+    suspend fun complete(reference: String, isApproved: Boolean) {
         releaseAndDispatch(
             reference,
-            PaymentProcessingEvent.Result(reference, SUCCESS_OUTCOME),
+            PaymentProcessingEvent.Result(
+                reference,
+                if (isApproved) SUCCESS_OUTCOME else FAILURE_OUTCOME,
+            ),
         )
     }
 
@@ -113,4 +116,5 @@ internal object PaymentProcessingCoordinator {
     }
 
     private const val SUCCESS_OUTCOME = "success"
+    private const val FAILURE_OUTCOME = "failure"
 }

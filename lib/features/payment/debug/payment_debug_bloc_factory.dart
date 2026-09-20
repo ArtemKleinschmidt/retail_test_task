@@ -1,3 +1,4 @@
+import 'package:retail_test_task/features/payment/data/repositories/method_channel_payment_repository.dart';
 import 'package:retail_test_task/features/payment/data/repositories/simulated_payment_repository.dart';
 import 'package:retail_test_task/features/payment/data/repositories/simulated_security_repository.dart';
 import 'package:retail_test_task/features/payment/data/sources/predefined_payment.dart';
@@ -11,24 +12,28 @@ import 'package:retail_test_task/features/payment/domain/use_cases/start_payment
 import 'package:retail_test_task/features/payment/presentation/bloc/payment_bloc.dart';
 
 PaymentBloc createDebugPaymentBloc(PaymentDebugScenario scenario) {
-  final paymentRepository = SimulatedPaymentRepository(
-    payment: createPredefinedPayment(),
+  final payment = createPredefinedPayment();
+  final simulatedPaymentRepository = SimulatedPaymentRepository(
+    payment: payment,
     loadBehavior: switch (scenario.loadBehavior) {
       PaymentDebugLoadBehavior.success => SimulatedPaymentLoadBehavior.success,
       PaymentDebugLoadBehavior.failure => SimulatedPaymentLoadBehavior.failure,
     },
-    processingBehavior: switch (scenario.processingBehavior) {
-      PaymentDebugProcessingBehavior.success =>
-        SimulatedPaymentProcessingBehavior.success,
+  );
+  final processingRepository = MethodChannelPaymentRepository(
+    payment: payment,
+    debugProcessingBehavior: switch (scenario.processingBehavior) {
+      PaymentDebugProcessingBehavior.success => null,
       PaymentDebugProcessingBehavior.declined =>
-        SimulatedPaymentProcessingBehavior.declined,
+        MethodChannelDebugProcessingBehavior.declined,
       PaymentDebugProcessingBehavior.startFailure =>
-        SimulatedPaymentProcessingBehavior.startFailure,
+        MethodChannelDebugProcessingBehavior.startFailure,
       PaymentDebugProcessingBehavior.streamFailure =>
-        SimulatedPaymentProcessingBehavior.streamFailure,
+        MethodChannelDebugProcessingBehavior.progressFailure,
     },
   );
   final securityRepository = SimulatedSecurityRepository(
+    checkDelay: Duration.zero,
     behavior: switch (scenario.securityBehavior) {
       PaymentDebugSecurityBehavior.clear => SimulatedSecurityBehavior.clear,
       PaymentDebugSecurityBehavior.unsupported =>
@@ -43,12 +48,12 @@ PaymentBloc createDebugPaymentBloc(PaymentDebugScenario scenario) {
   );
 
   return PaymentBloc(
-    loadPayment: LoadPayment(paymentRepository),
+    loadPayment: LoadPayment(simulatedPaymentRepository),
     checkSecurityStatus: CheckSecurityStatus(securityRepository),
     evaluateConfirmation: const EvaluateConfirmation(),
-    startPaymentProcessing: StartPaymentProcessing(paymentRepository),
-    observePaymentProcessing: ObservePaymentProcessing(paymentRepository),
+    startPaymentProcessing: StartPaymentProcessing(processingRepository),
+    observePaymentProcessing: ObservePaymentProcessing(processingRepository),
     observeScreenRecording: ObserveScreenRecording(securityRepository),
-    confirmationSecurityCheckDelay: const Duration(seconds: 3),
+    confirmationSecurityCheckDelay: const Duration(seconds: 2),
   );
 }
